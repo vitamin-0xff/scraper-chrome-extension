@@ -17,6 +17,14 @@ export default defineManifest({
   permissions: [
     'sidePanel',
     'contentSettings',
+    'cookies',
+    'scripting',
+    'storage',
+    'tabs',
+    'webNavigation',
+  ],
+  "host_permissions": [
+    '<all_urls>'
   ],
   content_scripts: [{
     js: ['src/content/main.tsx'],

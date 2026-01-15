@@ -3,18 +3,21 @@ import { useElementPicker } from "./useElementPicker";
 import { useState } from "react";
 
 type Propos = {
-    elementPicked?: PickedElement;
+    defaultBaseUrl?: string;
+    defaultPageParam?: string;
+    defaultOtherParams?: string[] | null;
+    onPatternDetected: (baseUrl: string, pageParam: string, otherParams: string[] | null) => void;
 }
 
-export const FetchPatternDetection = () => {
+export const FetchPatternDetection = ({defaultBaseUrl, defaultOtherParams, defaultPageParam, onPatternDetected}: Propos) => {
     const LOG = (...data: any[]) => {
         console.log('Fetch pattern detected', ...data);
     }
     const [elementPicked, setElementPicked] = useState<PickedElement | null>(null);
     const [isPickingElement, setIsPickingElement] = useState(false);
-    const [baseUrl, setBaseUrl] = useState('');
-    const [pageParam, setPageParam] = useState('');
-    const [otherParams, setOtherParams] = useState<string[] | null>(null);
+    const [baseUrl, setBaseUrl] = useState(defaultBaseUrl);
+    const [pageParam, setPageParam] = useState(defaultPageParam);
+    const [otherParams, setOtherParams] = useState<string[] | null>(defaultOtherParams || null);
 
     const handleElementPicked = (element: PickedElement) => {
         setIsPickingElement(false);
@@ -44,6 +47,7 @@ export const FetchPatternDetection = () => {
             }
         });
         setOtherParams(otherParamsArr.length > 0 ? otherParamsArr : null);
+        onPatternDetected(url.origin + url.pathname, detectedParam, otherParamsArr.length > 0 ? otherParamsArr : null);
     }
     const { startPicker } = useElementPicker(handleElementPicked, setIsPickingElement)
     return (
@@ -69,11 +73,19 @@ export const FetchPatternDetection = () => {
             <div className="form-group" style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
                 <div className="form-item">
                     <label className="form-label" htmlFor="base-url">Base Url</label>
-                    <input className="form-input" value={baseUrl} type="text" name="base-url" onChange={(e) => setBaseUrl(e.currentTarget.value)} />
+                    <input className="form-input" value={baseUrl} type="text" name="base-url"
+                        onChange={(e) => {
+                            setBaseUrl(e.currentTarget.value)
+                            onPatternDetected(e.currentTarget.value, pageParam ?? '', otherParams);
+                        }} />
                 </div>
                 <div className="form-item">
                     <label className="form-label" htmlFor="detected-page-param">Detected Page Param</label>
-                    <input className="form-input" value={pageParam} type="text" name="detected-page-param" onChange={(e) => setPageParam(e.currentTarget.value)} />
+                    <input className="form-input"
+                        value={pageParam} type="text" name="detected-page-param" onChange={(e) => {
+                            onPatternDetected(baseUrl ?? '',e.currentTarget.value, otherParams)
+                            setPageParam(e.currentTarget.value)
+                        }} />
                 </div>
                 {
                     otherParams && otherParams.length > 0 && (

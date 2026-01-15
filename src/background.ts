@@ -19,6 +19,32 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     }
 });
 
+chrome.runtime.onConnect.addListener(async (port) => {
+  if (port.name !== 'EXECUTE_OPERATION') return;
+  port.onMessage.addListener(async (msg) => {
+    if (msg.action === 'EXECUTE_EXTRACTION') {
+      port.postMessage({ status: 'started' });
+      console.log('Background: Starting extraction operation with data:', msg.data);
+        const [tab] = await chrome.tabs.query({
+            active: true,
+            currentWindow: true,
+        });
+      
+      console.log('Background: Active tab for extraction:', tab);
+      const urlParsed = new URL(msg.data.baseUrl ?? tab.url);
+      const url = `${urlParsed.protocol}//${urlParsed.hostname}`;
+      console.log('Background: Base URL for cookie retrieval:', url);
+      const cookies = await chrome.cookies.getAll({
+        domain: urlParsed.hostname,
+      });
+      console.log('Background: Retrieved cookies:', cookies);
+        // Simulate long-running operation
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      port.postMessage({ status: 'done' });
+    }
+  });
+});
+
 // Example: Send message to active tab
 async function sendMessageToActiveTab(message: any) {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });

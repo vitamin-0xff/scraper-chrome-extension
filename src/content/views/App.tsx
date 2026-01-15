@@ -1,10 +1,11 @@
 import Logo from '@/assets/crx.svg'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import SelectionTable from './SelectionTable'
 import TabNav from './TabNav'
 import RootElementCard from './RootElementCard'
 import SelectedElementInfo from './SelectedElementInfo'
 import SelectionForm from './SelectionForm'
+import PreviewExecute from './PreviewExecute'
 import { useElementPicker } from './useElementPicker'
 import { resolveIdentifier, getIdentifierType, toJsonKey } from './utils'
 import type { PickedElement, SelectionItem } from './types'
@@ -13,7 +14,7 @@ import { FetchPatternDetection } from './FetchPatternDetection'
 
 function App() {
   const [show, setShow] = useState(false)
-  const [activeTab, setActiveTab] = useState<'pick' | 'table' | 'pagination'>('pick')
+  const [activeTab, setActiveTab] = useState<'pick' | 'table' | 'preview' | 'pagination'>('pick')
   const [isPickingElement, setIsPickingElement] = useState(false)
   const [selectedElement, setSelectedElement] = useState<PickedElement | null>(null)
   const [customName, setCustomName] = useState('')
@@ -21,11 +22,53 @@ function App() {
   const [isArray, setIsArray] = useState(false)
   const [rootElement, setRootElement] = useState<SelectionItem | null>(null)
   const [savedSelections, setSavedSelections] = useState<SelectionItem[]>([])
+  const [_baseUrl, _setBaseUrl] = useState('');
+  const [_pageParam, _setPageParam] = useState('');
+  const [_otherParams, _setOtherParams] = useState<string[] | null>(null);
+  const maxNumberRef = useRef<number>(0);
+  const portRef = useRef<chrome.runtime.Port | null>(null);
+
+  const getPort = () => {
+    if (!portRef.current) {
+      portRef.current = chrome.runtime.connect({ name: 'EXECUTE_OPERATION' });
+      portRef.current.onDisconnect.addListener(() => {
+        portRef.current = null;
+      });
+    }
+    return portRef.current;
+  };
 
   const toggle = () => setShow(!show)
 
   const LOG = (...data: any[]) => {
     console.log('Content Script:', ...data)
+  }
+
+  const execute = async () => {
+    LOG('Execute extraction with current selections')
+    console.log({ rootElement, savedSelections });
+    console.log('Base URL:', _baseUrl);
+    console.log('Page Parameter:', _pageParam);
+    console.log('Other Parameters:', _otherParams);
+    console.log('Max Number of Pages:', maxNumberRef.current);
+    const port = getPort();
+    
+    port.postMessage({
+      action: 'EXECUTE_EXTRACTION',
+      data: {
+        rootElement,
+        savedSelections,
+        baseUrl: _baseUrl,
+        pageParam: _pageParam,
+        otherParams: _otherParams,
+        maxNumberOfPages: maxNumberRef.current,
+      },
+    });
+
+    port.onMessage.addListener((msg) => {
+      LOG('Message from background script:', msg);
+    });
+
   }
 
   const handleElementPicked = (element: PickedElement) => {
@@ -175,8 +218,8 @@ function App() {
               <SelectionTable items={savedSelections} onRemove={handleRemoveSelection} />
             </div>
           )}
-          {
-            activeTab === 'pagination' && (
+
+          {activeTab === 'pagination' && (
               <div
                 style={{
                   margin: '10px',
@@ -186,10 +229,32 @@ function App() {
                   border: '1px solid #ddd',
                 }}
               >
-                <FetchPatternDetection />
+                <FetchPatternDetection onPatternDetected={(baseUrl_, pageParam_, otherParams_) => {
+                  _setBaseUrl(baseUrl_)
+                  _setPageParam(pageParam_)
+                  _setOtherParams(otherParams_)
+                }}
+                defaultPageParam={_pageParam} 
+                defaultBaseUrl={_baseUrl}
+                defaultOtherParams={_otherParams}
+                />
               </div>
             )  
           }
+          {activeTab === 'preview' && (
+            <PreviewExecute
+             rootElement={rootElement}
+             children={savedSelections}
+             baseUrl={_baseUrl}
+             pageParam={_pageParam}
+             executeCallback={execute} 
+             maxNumberOfPages={maxNumberRef.current} 
+             onMaxNumberOfPagesChange={(newValue) => {
+                maxNumberRef.current = newValue ?? 0;
+                console.log('Max number of pages updated to:', maxNumberRef.current);
+             }}
+             />
+          )}
         </div>
       )}
       <button className="toggle-button" onClick={toggle}>
