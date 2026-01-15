@@ -21,6 +21,7 @@ function SelectionForm({
   return (
     <div
       style={{
+        width: 768,
         margin: '10px',
         padding: '10px',
         backgroundColor: '#fff',

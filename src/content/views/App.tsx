@@ -9,10 +9,11 @@ import { useElementPicker } from './useElementPicker'
 import { resolveIdentifier, getIdentifierType, toJsonKey } from './utils'
 import type { PickedElement, SelectionItem } from './types'
 import './App.css'
+import { FetchPatternDetection } from './FetchPatternDetection'
 
 function App() {
   const [show, setShow] = useState(false)
-  const [activeTab, setActiveTab] = useState<'pick' | 'table'>('pick')
+  const [activeTab, setActiveTab] = useState<'pick' | 'table' | 'pagination'>('pick')
   const [isPickingElement, setIsPickingElement] = useState(false)
   const [selectedElement, setSelectedElement] = useState<PickedElement | null>(null)
   const [customName, setCustomName] = useState('')
@@ -119,10 +120,8 @@ function App() {
     <div className="popup-container">
       {show && (
         <div className={`popup-content ${show ? 'opacity-100' : 'opacity-0'}`}>
-          <h1>EXTRACTOR</h1>
-
+          <h1 className='text-sm'>Extractor</h1>
           <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
-
           {activeTab === 'pick' && (
             <>
               <button
@@ -176,6 +175,21 @@ function App() {
               <SelectionTable items={savedSelections} onRemove={handleRemoveSelection} />
             </div>
           )}
+          {
+            activeTab === 'pagination' && (
+              <div
+                style={{
+                  margin: '10px',
+                  padding: '10px',
+                  backgroundColor: '#fff',
+                  borderRadius: '4px',
+                  border: '1px solid #ddd',
+                }}
+              >
+                <FetchPatternDetection />
+              </div>
+            )  
+          }
         </div>
       )}
       <button className="toggle-button" onClick={toggle}>

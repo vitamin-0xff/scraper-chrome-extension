@@ -9,10 +9,22 @@ function SelectionTable({ items, onRemove }: Props) {
   const children = items.filter(item => item.role === 'child');
   
   if (!children.length) {
-    return <p style={{ fontSize: '12px', color: '#555' }}>No child elements yet.</p>;
+    return <p style={{ 
+        fontSize: '12px', color: '#555',
+        width: 768, margin: '10px',
+        height: '40px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+     }}>No child elements yet.</p>;
   }
 
   return (
+    <div style={{
+        width: 768,
+        maxHeight: 400,
+        overflowY: 'auto',
+        border: '1px solid #ccc',
+        borderRadius: '4px',
+    }}>
     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
       <thead>
         <tr style={{ textAlign: 'left', borderBottom: '1px solid #ddd' }}>
@@ -57,6 +69,7 @@ function SelectionTable({ items, onRemove }: Props) {
         ))}
       </tbody>
     </table>
+    </div>
   );
 }
 

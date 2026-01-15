@@ -1,6 +1,6 @@
 type Props = {
-  activeTab: 'pick' | 'table'
-  onTabChange: (tab: 'pick' | 'table') => void
+  activeTab: 'pick' | 'table' | 'pagination'
+  onTabChange: (tab: 'pick' | 'table' | 'pagination') => void
 }
 
 function TabNav({ activeTab, onTabChange }: Props) {
@@ -31,6 +31,19 @@ function TabNav({ activeTab, onTabChange }: Props) {
         }}
       >
         Table
+      </button>
+      <button
+        onClick={() => onTabChange('pagination')}
+        style={{
+          padding: '8px 12px',
+          borderRadius: '4px',
+          border: '1px solid #ccc',
+          background: activeTab === 'pagination' ? '#3498db' : '#fff',
+          color: activeTab === 'pagination' ? '#fff' : '#000',
+          cursor: 'pointer',
+        }}
+      >
+        Pagination
       </button>
     </div>
   )
