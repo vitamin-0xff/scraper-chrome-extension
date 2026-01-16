@@ -6,11 +6,14 @@ import RootElementCard from './RootElementCard'
 import SelectedElementInfo from './SelectedElementInfo'
 import SelectionForm from './SelectionForm'
 import PreviewExecute from './PreviewExecute'
+import FetchingStatus from './FetchingStatus'
 import { useElementPicker } from './useElementPicker'
 import { resolveIdentifier, getIdentifierType, toJsonKey } from './utils'
 import type { PickedElement, SelectionItem } from './types'
 import './App.css'
 import { FetchPatternDetection } from './FetchPatternDetection'
+import { fetchElements } from '@/utils/fetch-elements'
+import { downloadJSON, generateFilename } from '@/utils/download-json'
 
 function App() {
   const [show, setShow] = useState(false)
@@ -26,17 +29,18 @@ function App() {
   const [_pageParam, _setPageParam] = useState('');
   const [_otherParams, _setOtherParams] = useState<string[] | null>(null);
   const maxNumberRef = useRef<number>(0);
-  const portRef = useRef<chrome.runtime.Port | null>(null);
-
-  const getPort = () => {
-    if (!portRef.current) {
-      portRef.current = chrome.runtime.connect({ name: 'EXECUTE_OPERATION' });
-      portRef.current.onDisconnect.addListener(() => {
-        portRef.current = null;
-      });
-    }
-    return portRef.current;
-  };
+  // Reserved for future background script execution
+  void useRef<chrome.runtime.Port | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const elements = useRef<any[]>([]);
+  const [countCurrentPage, setCountCurrentPage] = useState<{
+    page: number;
+    elementNumber: number;
+    totalElementsOnPage?: number;
+  } | null>(null);
+  const [fetching, setFetching] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [totalElementsFetched, setTotalElementsFetched] = useState(0);
 
   const toggle = () => setShow(!show)
 
@@ -44,31 +48,95 @@ function App() {
     console.log('Content Script:', ...data)
   }
 
-  const execute = async () => {
-    LOG('Execute extraction with current selections')
-    console.log({ rootElement, savedSelections });
-    console.log('Base URL:', _baseUrl);
-    console.log('Page Parameter:', _pageParam);
-    console.log('Other Parameters:', _otherParams);
-    console.log('Max Number of Pages:', maxNumberRef.current);
-    const port = getPort();
+  const localExecute = async () => {
+    LOG('Starting local extraction...')
     
-    port.postMessage({
-      action: 'EXECUTE_EXTRACTION',
-      data: {
-        rootElement,
-        savedSelections,
-        baseUrl: _baseUrl,
-        pageParam: _pageParam,
-        otherParams: _otherParams,
-        maxNumberOfPages: maxNumberRef.current,
-      },
-    });
+    // Reset state
+    setFetching(true)
+    setFetchError(null)
+    setTotalElementsFetched(0)
+    elements.current = []
+    setCountCurrentPage(null)
 
-    port.onMessage.addListener((msg) => {
-      LOG('Message from background script:', msg);
-    });
+    // Validate configuration
+    if (!rootElement) {
+      setFetchError('Root element not selected')
+      setFetching(false)
+      return
+    }
 
+    if (!savedSelections || savedSelections.length === 0) {
+      setFetchError('No child selections found')
+      setFetching(false)
+      return
+    }
+
+    if (!_baseUrl) {
+      setFetchError('Base URL not configured')
+      setFetching(false)
+      return
+    }
+
+    if (!_pageParam) {
+      setFetchError('Page parameter not configured')
+      setFetching(false)
+      return
+    }
+
+    const data = {
+      rootElement,
+      savedSelections,
+      baseUrl: _baseUrl,
+      pageParam: _pageParam,
+      otherParams: _otherParams,
+      maxNumberOfPages: Math.max(1, maxNumberRef.current || 1),
+    }
+
+    try {
+      // Create abort controller for cancellation
+      abortControllerRef.current = new AbortController()
+
+      for await (const result of fetchElements(data)) {
+        // Check for abort signal
+        if (abortControllerRef.current.signal.aborted) {
+          throw new Error('Fetch operation was cancelled')
+        }
+
+        // Handle errors from generator
+        if ('type' in result && result.type === 'error') {
+          console.error(`Error on page ${result.page}:`, result.message)
+          // Continue fetching even if one page fails
+          continue
+        }
+
+        // Type guard: ensure it's a FetchResult, not a FetchErrorEvent
+        if (!('data' in result)) {
+          continue
+        }
+
+        // Update state with fetched element
+        setCountCurrentPage(result.p)
+        setTotalElementsFetched(prev => prev + 1)
+        elements.current.push(result.data)
+        LOG('Fetched element:', result.data)
+      }
+
+      LOG('Extraction complete. Total elements:', elements.current.length)
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err)
+      LOG('Extraction error:', errorMsg)
+      setFetchError(errorMsg)
+    } finally {
+      setFetching(false)
+      abortControllerRef.current = null
+    }
+  }
+
+  const cancelFetch = () => {
+    LOG('Cancelling fetch operation...')
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
   }
 
   const handleElementPicked = (element: PickedElement) => {
@@ -242,18 +310,56 @@ function App() {
             )  
           }
           {activeTab === 'preview' && (
-            <PreviewExecute
-             rootElement={rootElement}
-             children={savedSelections}
-             baseUrl={_baseUrl}
-             pageParam={_pageParam}
-             executeCallback={execute} 
-             maxNumberOfPages={maxNumberRef.current} 
-             onMaxNumberOfPagesChange={(newValue) => {
-                maxNumberRef.current = newValue ?? 0;
-                console.log('Max number of pages updated to:', maxNumberRef.current);
-             }}
-             />
+            <>
+              <FetchingStatus
+                fetching={fetching}
+                currentPage={countCurrentPage?.page ?? null}
+                elementCount={totalElementsFetched}
+                error={fetchError}
+                onCancel={cancelFetch}
+              />
+              {!fetching && totalElementsFetched > 0 && (
+                <div style={{ margin: '15px 0', display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => {
+                      downloadJSON(elements.current, generateFilename('extracted-data'));
+                    }}
+                    style={{
+                      padding: '10px 16px',
+                      backgroundColor: '#2196F3',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      transition: 'background-color 0.3s',
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.target as HTMLButtonElement).style.backgroundColor = '#1976D2';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.target as HTMLButtonElement).style.backgroundColor = '#2196F3';
+                    }}
+                  >
+                    Download JSON ({totalElementsFetched} items)
+                  </button>
+                </div>
+              )}
+              <PreviewExecute
+                fetching={fetching}
+                rootElement={rootElement}
+                children={savedSelections}
+                baseUrl={_baseUrl}
+                pageParam={_pageParam}
+                executeCallback={localExecute}
+                maxNumberOfPages={maxNumberRef.current}
+                onMaxNumberOfPagesChange={(newValue) => {
+                  maxNumberRef.current = newValue ?? 0;
+                  console.log('Max number of pages updated to:', maxNumberRef.current);
+                }}
+              />
+            </>
           )}
         </div>
       )}

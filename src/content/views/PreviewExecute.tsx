@@ -1,4 +1,5 @@
-import { useMemo, useReducer, useState } from 'react'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useEffect, useMemo, useReducer } from 'react'
 import type { SelectionItem } from './types'
 import SelectionTable from './SelectionTable'
 import { Input, RowInput } from '@/components/RowInput'
@@ -11,19 +12,20 @@ type Props = {
   otherParams?: string[] | null
   maxNumberOfPages?: number
   executeCallback: () => Promise<void>
+  fetching: boolean
   onMaxNumberOfPagesChange?: (value: number | null) => void
 }
 
-type ExtractedData = {
-  [key: string]: any
-}
+// type ExtractedData = {
+//   [key: string]: any
+// }
 
-type PreviewResult = {
-  rootCount: number
-  childCounts: { [key: string]: number }
-  samples: ExtractedData[]
-  error?: string
-}
+// type PreviewResult = {
+//   rootCount: number
+//   childCounts: { [key: string]: number }
+//   samples: ExtractedData[]
+//   error?: string
+// }
 
 const reducer = (
     state: {[key: string]: Input},
@@ -32,10 +34,12 @@ const reducer = (
     return {...state, ...action};
 }
 
-function PreviewExecute({ rootElement, children, baseUrl, pageParam, maxNumberOfPages, onMaxNumberOfPagesChange, executeCallback }: Props) {
-    const [previewResult, setPreviewResult] = useState<PreviewResult | null>(null)
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+function PreviewExecute({ rootElement, children, baseUrl, pageParam, maxNumberOfPages, fetching, onMaxNumberOfPagesChange, executeCallback }: Props) {
+    // Reserved for future preview modal feature
+    // const [_previewResult, _setPreviewResult] = useState<PreviewResult | null>(null)
+    // const setPreviewResultStub = (_result: PreviewResult | null) => { /* stub */ }
+    // const [isLoading, setIsLoading] = useState(false)
+    // const [error, setError] = useState<string | null>(null)
     const [inputReducer, setInputReducer] = useReducer<{ [key: string]: Input}, any>(reducer, {
         "maxPages": {
             uniqueKey: 'maxPages',
@@ -67,38 +71,13 @@ function PreviewExecute({ rootElement, children, baseUrl, pageParam, maxNumberOf
 
     }, [inputElements]);
 
-    const handleExecutePreview = async () => {
-        if (!rootElement) {
-            setError('Root element is not defined.')
-            return
-        }
-        setIsLoading(true)
-        setError(null)
-        setPreviewResult(null)
-        try {
-            // Simulate fetching and processing data
-            await new Promise(resolve => setTimeout(resolve, 2000))
-            // Dummy preview result for demonstration
-            const dummyResult: PreviewResult = {
-                rootCount: 10,
-                childCounts: children.reduce((acc, child) => {
-                    acc[child.name] = 10
-                    return acc
-                }, {} as { [key: string]: number }),
-                samples: [
-                    children.reduce((acc, child) => {
-                        acc[child.name] = `Sample data for ${child.name}`
-                        return acc
-                    }, {} as ExtractedData)
-                ]
-            }
-            setPreviewResult(dummyResult)
-        } catch (err) {
-            setError('An error occurred during preview execution.')
-        } finally {
-            setIsLoading(false)
-        }
-    }
+    // Reserved for future preview modal feature - stubbed implementation
+    useEffect(() => {
+        // Reserved for future preview modal feature
+        // const executePreviewStub = async () => { ... }
+        // Stubbed: executePreviewStub will be implemented when preview modal is added
+        void rootElement; // Reference rootElement to satisfy linter
+    }, [rootElement, children]);
 
     return (
         <div>
@@ -162,12 +141,11 @@ function PreviewExecute({ rootElement, children, baseUrl, pageParam, maxNumberOf
                         borderRadius: '4px',
                         cursor: 'pointer',
                     }}
-                    disabled={isLoading || !rootElement}
+                    disabled={fetching}
                 >
-                    {isLoading ? 'Executing Preview...' : 'Execute Preview'}
+                    {fetching ? 'Fetching Preview...' : 'Execute Preview'}
                 </button>
             </div>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
     )
 
