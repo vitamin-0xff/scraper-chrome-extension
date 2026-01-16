@@ -32,12 +32,7 @@ export const RowInput = ({inputProps, onChange, label}: RowInputProps) => {
                             <input
                                 type="number"
                                 onChange={(e) => onChange(uniqueKey ,e.currentTarget.value)}
-                                style={{
-                                    padding: '8px',
-                                    border: '1px solid #ccc',
-                                    borderRadius: '4px',
-                                    fontSize: 14,
-                                }}
+                                className="form-input"
                                 {...rest}
                             />
                             {error && (

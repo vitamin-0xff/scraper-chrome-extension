@@ -1,3 +1,4 @@
+import { downloadJSON, generateFilename } from '@/utils/download-json'
 import { useEffect, useState } from 'react'
 
 type Props = {
@@ -7,9 +8,10 @@ type Props = {
   totalElements?: number
   error?: string | null
   onCancel?: () => void
+  onDownload?: () => void
 }
 
-function FetchingStatus({ fetching, currentPage, elementCount, totalElements, error, onCancel }: Props) {
+function FetchingStatus({ fetching, currentPage, elementCount, totalElements, error, onCancel, onDownload }: Props) {
   const [elapsedTime, setElapsedTime] = useState(0)
 
   useEffect(() => {
@@ -40,7 +42,6 @@ function FetchingStatus({ fetching, currentPage, elementCount, totalElements, er
   return (
     <div
       style={{
-        margin: '10px',
         padding: '12px',
         backgroundColor: fetching ? '#e3f2fd' : '#e8f5e9',
         borderRadius: '4px',
@@ -49,6 +50,7 @@ function FetchingStatus({ fetching, currentPage, elementCount, totalElements, er
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {fetching && (
             <div
@@ -81,7 +83,26 @@ function FetchingStatus({ fetching, currentPage, elementCount, totalElements, er
           >
             Cancel
           </button>
+
         )}
+
+      {!fetching && elementCount > 0 && (
+        <button
+            onClick={() => {
+              onDownload?.();
+            }}
+          style={{
+            padding: '4px 8px',
+            backgroundColor: '#ddd',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer',
+            fontSize: '12px',
+          }}
+        >
+          Download ({elementCount} element{elementCount !== 1 ? 's' : ''})
+        </button>
+      )}
       </div>
 
       <div style={{ fontSize: '12px', color: '#555' }}>

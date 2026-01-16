@@ -11,19 +11,15 @@ function SelectionTable({ items, onRemove }: Props) {
   if (!children.length) {
     return <p style={{ 
         fontSize: '12px', color: '#555',
-        width: 768, margin: '10px',
         height: '40px',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
      }}>No child elements yet.</p>;
   }
 
   return (
-    <div style={{
-        width: 768,
+    <div className='cont cont-fill s' style={{
         maxHeight: 400,
         overflowY: 'auto',
-        border: '1px solid #ccc',
-        borderRadius: '4px',
     }}>
     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
       <thead>

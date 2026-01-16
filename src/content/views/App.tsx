@@ -230,28 +230,11 @@ function App() {
   return (
     <div className="popup-container">
       {show && (
-        <div className={`popup-content ${show ? 'opacity-100' : 'opacity-0'}`}>
-          <h1 className='text-sm'>Extractor</h1>
+        <div className={`popup-content ${show ? 'opacity-100' : 'opacity-0'} cont`} style={{width: 768}}>
+          <h1 className='header'>Extractor</h1>
           <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
           {activeTab === 'pick' && (
             <>
-              <button
-                onClick={startPicker}
-                style={{
-                  padding: '10px 20px',
-                  margin: '10px',
-                  backgroundColor: isPickingElement ? '#ff6b6b' : '#4CAF50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                }}
-              >
-                {isPickingElement ? 'Picking... (ESC to cancel)' : 'Pick Element'}
-              </button>
-
               {selectedElement && (
                 <SelectedElementInfo element={selectedElement} />
               )}
@@ -269,33 +252,37 @@ function App() {
               {rootElement && (
                 <RootElementCard rootElement={rootElement} onRemove={handleRemoveSelection} />
               )}
+              <div className="f jc-end">
+              <button
+                onClick={startPicker}
+                className='s'
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: isPickingElement ? '#ff6b6b' : '#4CAF50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                }}
+              >
+                {isPickingElement ? 'Picking... (ESC to cancel)' : 'Pick Element'}
+              </button>
+              </div>
+
             </>
           )}
 
           {activeTab === 'table' && (
-            <div
-              style={{
-                margin: '10px',
-                padding: '10px',
-                backgroundColor: '#fff',
-                borderRadius: '4px',
-                border: '1px solid #ddd',
-              }}
-            >
-              <h3 style={{ marginTop: 0 }}>Saved selections</h3>
+            <div className='bs'>
+              <p className='header s'>Saved selections</p>
               <SelectionTable items={savedSelections} onRemove={handleRemoveSelection} />
             </div>
           )}
 
           {activeTab === 'pagination' && (
               <div
-                style={{
-                  margin: '10px',
-                  padding: '10px',
-                  backgroundColor: '#fff',
-                  borderRadius: '4px',
-                  border: '1px solid #ddd',
-                }}
               >
                 <FetchPatternDetection onPatternDetected={(baseUrl_, pageParam_, otherParams_) => {
                   _setBaseUrl(baseUrl_)
@@ -312,40 +299,15 @@ function App() {
           {activeTab === 'preview' && (
             <>
               <FetchingStatus
+                onDownload={() => {
+                  downloadJSON(elements.current, generateFilename('extracted-data'));
+                }}
                 fetching={fetching}
                 currentPage={countCurrentPage?.page ?? null}
                 elementCount={totalElementsFetched}
                 error={fetchError}
                 onCancel={cancelFetch}
               />
-              {!fetching && totalElementsFetched > 0 && (
-                <div style={{ margin: '15px 0', display: 'flex', gap: '10px' }}>
-                  <button
-                    onClick={() => {
-                      downloadJSON(elements.current, generateFilename('extracted-data'));
-                    }}
-                    style={{
-                      padding: '10px 16px',
-                      backgroundColor: '#2196F3',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      transition: 'background-color 0.3s',
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.target as HTMLButtonElement).style.backgroundColor = '#1976D2';
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.target as HTMLButtonElement).style.backgroundColor = '#2196F3';
-                    }}
-                  >
-                    Download JSON ({totalElementsFetched} items)
-                  </button>
-                </div>
-              )}
               <PreviewExecute
                 fetching={fetching}
                 rootElement={rootElement}

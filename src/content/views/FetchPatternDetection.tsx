@@ -51,24 +51,7 @@ export const FetchPatternDetection = ({defaultBaseUrl, defaultOtherParams, defau
     }
     const { startPicker } = useElementPicker(handleElementPicked, setIsPickingElement)
     return (
-        <div style={{
-            width: 768
-        }}>
-            <button
-                onClick={startPicker}
-                style={{
-                    padding: '10px 20px',
-                    backgroundColor: isPickingElement ? '#ff6b6b' : '#4CAF50',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                }}
-            >
-                {isPickingElement ? 'Picking... (ESC to cancel)' : 'Pick Element'}
-            </button>
+        <div>
             <small style={{ display: 'block', marginTop: 12 }} className="text-sm block">Pattern Detection (should be a link with page param, aka page, p..)</small>
             <div className="form-group" style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
                 <div className="form-item">
@@ -95,6 +78,23 @@ export const FetchPatternDetection = ({defaultBaseUrl, defaultOtherParams, defau
                         </div>
                     )
                 }
+            </div>
+            <div className="f jc-end">
+            <button
+                onClick={startPicker}
+                style={{
+                    padding: '10px 20px',
+                    backgroundColor: isPickingElement ? '#ff6b6b' : '#4CAF50',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                }}
+            >
+                {isPickingElement ? 'Picking... (ESC to cancel)' : 'Pick Element'}
+            </button>
             </div>
         </div>
     )

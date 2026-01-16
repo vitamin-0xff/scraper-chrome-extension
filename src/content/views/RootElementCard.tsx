@@ -8,17 +8,11 @@ type Props = {
 function RootElementCard({ rootElement, onRemove }: Props) {
   return (
     <div
-      style={{
-        margin: '10px',
-        padding: '10px',
-        backgroundColor: '#e8f5e9',
-        borderRadius: '4px',
-        border: '1px solid #4caf50',
-      }}
+    className='cont cont-fill s'
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h4 style={{ margin: 0, marginBottom: '4px', color: '#2e7d32' }}>Root Element</h4>
+          <p className='header s' >Root Element</p>
           <p style={{ margin: 0, fontSize: '12px' }}>
             <strong>Name:</strong> {rootElement.name}
           </p>

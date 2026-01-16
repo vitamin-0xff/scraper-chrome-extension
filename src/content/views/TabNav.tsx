@@ -5,56 +5,28 @@ type Props = {
 
 function TabNav({ activeTab, onTabChange }: Props) {
   return (
-    <div style={{ display: 'flex', gap: '8px', margin: '10px' }}>
+    <div style={{ display: 'flex', gap: '8px'}} className="s">
       <button
         onClick={() => onTabChange('pick')}
-        style={{
-          padding: '8px 12px',
-          borderRadius: '4px',
-          border: '1px solid #ccc',
-          background: activeTab === 'pick' ? '#3498db' : '#fff',
-          color: activeTab === 'pick' ? '#fff' : '#000',
-          cursor: 'pointer',
-        }}
+        className={"btn " + (activeTab === 'pick' ? ' active-a' : ' not-active')}
       >
         Picker
       </button>
       <button
         onClick={() => onTabChange('table')}
-        style={{
-          padding: '8px 12px',
-          borderRadius: '4px',
-          border: '1px solid #ccc',
-          background: activeTab === 'table' ? '#3498db' : '#fff',
-          color: activeTab === 'table' ? '#fff' : '#000',
-          cursor: 'pointer',
-        }}
+        className={"btn " + (activeTab === 'table' ? ' active-a' : ' not-active')}
       >
         Table
       </button>
       <button
         onClick={() => onTabChange('pagination')}
-        style={{
-          padding: '8px 12px',
-          borderRadius: '4px',
-          border: '1px solid #ccc',
-          background: activeTab === 'pagination' ? '#3498db' : '#fff',
-          color: activeTab === 'pagination' ? '#fff' : '#000',
-          cursor: 'pointer',
-        }}
+        className={"btn " + (activeTab === 'pagination' ? ' active-a' : ' not-active')}
       >
         Pagination
       </button>
       <button
         onClick={() => onTabChange('preview')}
-        style={{
-          padding: '8px 12px',
-          borderRadius: '4px',
-          border: '1px solid #ccc',
-          background: activeTab === 'preview' ? '#3498db' : '#fff',
-          color: activeTab === 'preview' ? '#fff' : '#000',
-          cursor: 'pointer',
-        }}
+        className={"btn " + (activeTab === 'preview' ? ' active-a' : ' not-active')}
       >
         Preview & Execute
       </button>

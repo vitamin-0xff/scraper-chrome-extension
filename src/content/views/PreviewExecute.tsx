@@ -35,11 +35,6 @@ const reducer = (
 }
 
 function PreviewExecute({ rootElement, children, baseUrl, pageParam, maxNumberOfPages, fetching, onMaxNumberOfPagesChange, executeCallback }: Props) {
-    // Reserved for future preview modal feature
-    // const [_previewResult, _setPreviewResult] = useState<PreviewResult | null>(null)
-    // const setPreviewResultStub = (_result: PreviewResult | null) => { /* stub */ }
-    // const [isLoading, setIsLoading] = useState(false)
-    // const [error, setError] = useState<string | null>(null)
     const [inputReducer, setInputReducer] = useReducer<{ [key: string]: Input}, any>(reducer, {
         "maxPages": {
             uniqueKey: 'maxPages',
@@ -90,13 +85,9 @@ function PreviewExecute({ rootElement, children, baseUrl, pageParam, maxNumberOf
                     value={baseUrl || ''}
                     placeholder="Base URL"
                     readOnly
+                    className='form-input'
                     style={{
                         flex: 2,
-                        padding: '8px',
-                        border: '1px solid #ccc',
-                        color: '#555',
-                        borderRadius: '4px',
-                        fontSize: 14,
                     }}
                 />
                 <input
@@ -104,13 +95,9 @@ function PreviewExecute({ rootElement, children, baseUrl, pageParam, maxNumberOf
                     value={pageParam || ''}
                     placeholder="Page Parameter"
                     readOnly
+                    className='form-input'
                     style={{
                         flex: 1,
-                        padding: '8px',
-                        border: '1px solid #ccc',
-                        color: '#555',
-                        borderRadius: '4px',
-                        fontSize: 14,
                     }}
                 />
             </div>

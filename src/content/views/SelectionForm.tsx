@@ -20,18 +20,11 @@ function SelectionForm({
 }: Props) {
   return (
     <div
-      style={{
-        width: 768,
-        margin: '10px',
-        padding: '10px',
-        backgroundColor: '#fff',
-        borderRadius: '4px',
-        border: '1px solid #ddd',
-      }}
+        className='cont cont-fill s'
     >
-      <div className='mb-1' style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-        <h3 style={{ marginTop: 0 }}>Save selection</h3>
-        <p className='text-sm m-0 text-gray-500'>
+      <div className='card'>
+        <h3 className='header'>Save selection</h3>
+        <p className='header-note'>
           (First selection root)
         </p>
       </div>
@@ -40,18 +33,13 @@ function SelectionForm({
         value={customName}
         placeholder="Name (JSON key safe)"
         onChange={e => onNameChange(toJsonKey(e.target.value))}
-        style={{
-          width: '100%',
-          padding: '8px',
-          marginBottom: '8px',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-        }}
+        className='form-input bs'
       />
       <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '12px' }}>
         <input
           type="checkbox"
           checked={isArray}
+          className='bs'
           onChange={e => onArrayChange(e.target.checked)}
         />
         Array

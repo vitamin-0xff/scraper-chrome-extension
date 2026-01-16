@@ -8,24 +8,20 @@ type Props = {
 function SelectedElementInfo({ element }: Props) {
   return (
     <div
-      style={{
-        margin: '10px',
-        padding: '10px',
-        backgroundColor: '#f0f0f0',
-        borderRadius: '4px',
-        fontSize: '12px',
-      }}
+        className='cont cont-fill s'
     >
-      <strong>Selected:</strong>
-      <p>&lt;{element.tagName.toLowerCase()}&gt;</p>
-      <p><strong>Identifier:</strong> {resolveIdentifier(element)}</p>
+      
+      <p className='s'>
+        <strong>Selected: </strong>
+        &lt;{element.tagName.toLowerCase()}&gt;</p>
+      <p className='s'><strong>Identifier:</strong> {resolveIdentifier(element)}</p>
       {element.href && (
-        <p>
+        <p className='s'>
           <strong>Href:</strong> {element.href}
         </p>
       )}
       {element.textContent && (
-        <p>
+        <p className='s'>
           <strong>Text:</strong> {element.textContent.substring(0, 100)}
         </p>
       )}
