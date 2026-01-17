@@ -1,9 +1,9 @@
 import { useCallback } from 'react'
 import type { PickedElement } from './types'
-import { resolveIdentifier, getIdentifierType } from './utils'
+import { resolveIdentifier, getIdentifierType } from '../../utils/utils'
 
 export function useElementPicker(
-  onElementPicked: (element: PickedElement) => void,
+  onElementPicked: (element: PickedElement, nativeElement: HTMLElement) => void,
   onPickingStateChange: (isPicking: boolean) => void
 ) {
   const startPicker = useCallback(() => {
@@ -112,7 +112,7 @@ export function useElementPicker(
       }
 
       console.log('Content Script: Selected element:', elementData)
-      onElementPicked(elementData)
+      onElementPicked(elementData, target)
       stopPicker()
     }
 

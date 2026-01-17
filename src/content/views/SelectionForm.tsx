@@ -1,4 +1,4 @@
-import { toJsonKey } from './utils'
+import { toJsonKey } from '../../utils/utils'
 
 type Props = {
   customName: string

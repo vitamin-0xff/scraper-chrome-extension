@@ -1,5 +1,5 @@
 import type { PickedElement } from './types'
-import { resolveIdentifier } from './utils'
+import { resolveIdentifier } from '../../utils/utils'
 
 type Props = {
   element: PickedElement

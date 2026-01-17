@@ -5,6 +5,22 @@ export type PickedElement = {
   outerHTML: string
   textContent: string
   href?: string | null
+  src?: string | null
+}
+
+export type ElementType = 'text' | 'image' | 'link'
+
+export type ChildElement = {
+  id: string
+  name: string
+  type: ElementType
+  path: string
+  isList: boolean
+  // Type-specific fields
+  extractText?: boolean  // for text and link types
+  extractHref?: boolean  // for link type
+  extractSrc?: boolean   // for image type
+  extractAlt?: boolean   // for image type
 }
 
 export type SelectionItem = {
