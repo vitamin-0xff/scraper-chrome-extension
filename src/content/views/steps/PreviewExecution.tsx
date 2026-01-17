@@ -111,12 +111,19 @@ export const PreviewExecution = ({
                 
                 // Fetch and extract from page
                 const response = await fetch(pageUrl);
+                if(!response.ok) {
+                    console.warn("Bad request " + response.status);
+                    continue;
+                }
+                
                 const html = await response.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 
                 // Extract data from fetched page
                 const rootElements = doc.querySelectorAll(rootSelector);
+                console.log()
+                console.log(rootElement);
                 rootElements.forEach((rootElem) => {
                     const item: ExtractedItem = {};
                     childElements.forEach((child) => {
