@@ -1,9 +1,10 @@
 import { useCallback } from 'react'
 import type { PickedElement } from './types'
 import { resolveIdentifier, getIdentifierType } from '../../utils/utils'
+import { generateSelector } from './algorithms/rootElementAlgorithms'
 
 export function useElementPicker(
-  onElementPicked: (element: PickedElement, nativeElement: HTMLElement) => void,
+  onElementPicked: (element: PickedElement) => void,
   onPickingStateChange: (isPicking: boolean) => void
 ) {
   const startPicker = useCallback(() => {
@@ -73,7 +74,8 @@ export function useElementPicker(
         target.setAttribute('data-extractor-highlight', 'true')
         hoveredElement = target
 
-        const elementData: PickedElement = {
+        // Temporary object for tooltip - using type assertion to avoid creating full PickedElement
+        const elementInfo = {
           tagName: target.tagName,
           id: target.id || null,
           className: target.className || null,
@@ -81,8 +83,8 @@ export function useElementPicker(
           textContent: '',
           href: (target as HTMLAnchorElement).href || target.getAttribute('href'),
         }
-        const identifier = resolveIdentifier(elementData)
-        const identifierType = getIdentifierType(elementData)
+        const identifier = resolveIdentifier(elementInfo as PickedElement)
+        const identifierType = getIdentifierType(elementInfo as PickedElement)
 
         tooltip.textContent = `${identifier} (${identifierType})`
         tooltip.style.display = 'block'
@@ -102,6 +104,14 @@ export function useElementPicker(
       const target = e.target as HTMLElement
       if (!target) return
       console.log('Content Script: Element clicked:', target);
+      
+      // Generate selector for the element
+      const selector = generateSelector(target);
+      
+      // Calculate index: find all elements matching this selector and get position
+      const allMatchingElements = document.querySelectorAll(selector);
+      const index = Array.from(allMatchingElements).indexOf(target);
+      
       const elementData: PickedElement = {
         tagName: target.tagName,
         id: target.id || null,
@@ -109,10 +119,12 @@ export function useElementPicker(
         outerHTML: target.outerHTML?.substring(0, 500) || '',
         textContent: target.textContent?.substring(0, 200) || '',
         href: (target as HTMLAnchorElement).href || target.getAttribute('href'),
+        selector: selector,
+        index: index
       }
 
       console.log('Content Script: Selected element:', elementData)
-      onElementPicked(elementData, target)
+      onElementPicked(elementData)
       stopPicker()
     }
 

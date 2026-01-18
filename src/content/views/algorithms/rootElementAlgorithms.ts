@@ -3,6 +3,8 @@
  * Algorithms for analyzing and selecting root container elements
  */
 
+import { isSemanticClass } from "./extractionEngine";
+
 export type RootElementStats = {
     countOnPage: number;
     tagName: string;
@@ -45,31 +47,8 @@ export function calculateRootElementStats(element: HTMLElement): RootElementStat
  * Strategy 3: Tag name document-wide
  */
 export function calculateElementCount(element: HTMLElement): number {
-    // Strategy 1: Use class name if available
-    if (element.className && element.className.trim()) {
-        const classes = element.className.trim().split(/\s+/);
-        const primaryClass = classes[0];
-        const similarByClass = document.querySelectorAll(`.${primaryClass}`);
-        if (similarByClass.length > 1) {
-            return similarByClass.length;
-        }
-    }
-    
-    // Strategy 2: Use parent + tag name
-    const parent = element.parentElement;
-    if (parent) {
-        const siblings = Array.from(parent.children).filter(
-            child => child.tagName === element.tagName
-        );
-        if (siblings.length > 1) {
-            return siblings.length;
-        }
-    }
-    
-    // Strategy 3: Use tag name within document scope
-    const tagName = element.tagName.toLowerCase();
-    const allSimilar = document.querySelectorAll(tagName);
-    
+    const selector = generateSelector(element); 
+    const allSimilar = document.querySelectorAll(selector);
     return allSimilar.length;
 }
 
@@ -96,10 +75,10 @@ export function generateSelector(element: HTMLElement): string {
     if (element.id) {
         return `#${element.id}`;
     }
-    
-    if (element.className && element.className.trim()) {
-        const classes = element.className.trim().split(/\s+/).slice(0, 3).join('.');
-        return `.${classes}`;
+    if (element.className) {
+        const classes = element.className.trim().split(/\s+/).filter(isSemanticClass).slice(0, 3).join('.');
+        if(classes)
+        return `${element.tagName.toLowerCase()}.${classes}`;
     }
     
     const parent = element.parentElement;

@@ -6,30 +6,30 @@ type Props = {
 
 function TabNav({ activeTab, onTabChange }: Props) {
   return (
-    <div style={{ display: 'flex', gap: '8px'}} className="s">
+    <div style={{ display: 'flex', gap: '8px'}} className="crx-ext-s">
       <button
         onClick={() => onTabChange('root')}
-        className={"btn " + (activeTab === 'root' ? ' active-a' : ' not-active')}
+        className={"crx-ext-btn " + (activeTab === 'root' ? ' crx-ext-active-a' : ' crx-ext-not-active')}
       >
         Root
       </button>
       <button
         onClick={() => onTabChange('children')}
-        className={"btn " + (activeTab === 'children' ? ' active-a' : ' not-active')}
+        className={"crx-ext-btn " + (activeTab === 'children' ? ' crx-ext-active-a' : ' crx-ext-not-active')}
       >
         Children
       </button>
 
       <button
         onClick={() => onTabChange('pagination')}
-        className={"btn " + (activeTab === 'pagination' ? ' active-a' : ' not-active')}
+        className={"crx-ext-btn " + (activeTab === 'pagination' ? ' crx-ext-active-a' : ' crx-ext-not-active')}
       >
         Pagination
       </button>
 
       <button
         onClick={() => onTabChange('preview')}
-        className={"btn " + (activeTab === 'preview' ? ' active-a' : ' not-active')}
+        className={"crx-ext-btn " + (activeTab === 'preview' ? ' crx-ext-active-a' : ' crx-ext-not-active')}
       >
         Preview
       </button>

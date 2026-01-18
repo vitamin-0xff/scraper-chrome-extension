@@ -20,6 +20,7 @@ export const FetchPatternDetection = ({defaultBaseUrl, defaultOtherParams, defau
     const [otherParams, setOtherParams] = useState<string[] | null>(defaultOtherParams || null);
 
     const handleElementPicked = (element: PickedElement) => {
+        console.log('Pagination element picked - Selector:', element.selector, 'Index:', element.index);
         setIsPickingElement(false);
         setPageParam('');
         setBaseUrl('');
@@ -52,19 +53,19 @@ export const FetchPatternDetection = ({defaultBaseUrl, defaultOtherParams, defau
     const { startPicker } = useElementPicker(handleElementPicked, setIsPickingElement)
     return (
         <div>
-            <small style={{ display: 'block', marginTop: 12 }} className="text-sm block">Pattern Detection (should be a link with page param, aka page, p..)</small>
-            <div className="form-group" style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
-                <div className="form-item">
-                    <label className="form-label" htmlFor="base-url">Base Url</label>
-                    <input className="form-input" value={baseUrl} type="text" name="base-url"
+            <small style={{ display: 'block', marginTop: 12 }} className="crx-ext-text-sm crx-ext-block">Pattern Detection (should be a link with page param, aka page, p..)</small>
+            <div className="crx-ext-form-group" style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
+                <div className="crx-ext-form-item">
+                    <label className="crx-ext-form-label" htmlFor="base-url">Base Url</label>
+                    <input className="crx-ext-form-input" value={baseUrl} type="text" name="base-url"
                         onChange={(e) => {
                             setBaseUrl(e.currentTarget.value)
                             onPatternDetected(e.currentTarget.value, pageParam ?? '', otherParams);
                         }} />
                 </div>
-                <div className="form-item">
-                    <label className="form-label" htmlFor="detected-page-param">Detected Page Param</label>
-                    <input className="form-input"
+                <div className="crx-ext-form-item">
+                    <label className="crx-ext-form-label" htmlFor="detected-page-param">Detected Page Param</label>
+                    <input className="crx-ext-form-input"
                         value={pageParam} type="text" name="detected-page-param" onChange={(e) => {
                             onPatternDetected(baseUrl ?? '',e.currentTarget.value, otherParams)
                             setPageParam(e.currentTarget.value)
@@ -72,14 +73,14 @@ export const FetchPatternDetection = ({defaultBaseUrl, defaultOtherParams, defau
                 </div>
                 {
                     otherParams && otherParams.length > 0 && (
-                        <div className="form-item">
-                            <label className="form-label" htmlFor="detected-page-param">Other Params</label>
-                            <input disabled className="form-input" value={otherParams?.join(",")} type="text" name="detected-page-param" onChange={(e) => setPageParam(e.currentTarget.value)} />
+                        <div className="crx-ext-form-item">
+                            <label className="crx-ext-form-label" htmlFor="detected-page-param">Other Params</label>
+                            <input disabled className="crx-ext-form-input" value={otherParams?.join(",")} type="text" name="detected-page-param" onChange={(e) => setPageParam(e.currentTarget.value)} />
                         </div>
                     )
                 }
             </div>
-            <div className="f jc-end">
+            <div className="crx-ext-f crx-ext-jc-end">
             <button
                 onClick={startPicker}
                 style={{

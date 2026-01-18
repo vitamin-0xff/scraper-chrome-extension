@@ -21,6 +21,20 @@ export type ExtractionResult = {
     error?: string;
 };
 
+// Filter out Tailwind/utility classes to build valid selectors
+export function isSemanticClass(cls: string): boolean {
+    if (!cls) return false;
+    // Drop responsive/state prefixes
+    if (/^(sm|md|lg|xl|2xl|hover|focus|active|disabled|group|peer|dark):/i.test(cls)) return false;
+    // Drop common utility prefixes (padding, margin, colors, layout, etc.)
+    if (/^(transition|duration|ease|animate|p-|m-|px-|py-|pt-|pr-|pb-|pl-|mx-|my-|mt-|mr-|mb-|ml-|text-|bg-|border-|rounded-|shadow-|w-|h-|min-w-|min-h-|max-w-|max-h-|flex|grid|items-|justify-|content-|gap-|space-|place-|object-|overflow-|opacity-|z-|top-|left-|right-|bottom-|inset-|font-|leading-|tracking-|underline|decoration-|sr-only|visible|invisible|cursor-|select-|pointer-events-|resize-|list-|table-|order-|scale-|rotate-|translate-|skew-|origin-|ring-|stroke-|fill-|from-|to-|via-)/i.test(cls)) {
+        return false;
+    }
+    // Drop classes containing slashes or extra modifiers (e.g., from-blue-50/40)
+    if (/[/:]/.test(cls)) return false;
+    return true;
+}
+
 /**
  * Extract data from current page using CSS selectors
  */
@@ -30,19 +44,25 @@ export function extractFromCurrentPage(
 ): ExtractedItem[] {
     const items: ExtractedItem[] = [];
     
-    // Find all root elements
-    const rootElements = document.querySelectorAll(rootSelector);
-    
-    rootElements.forEach((rootElement) => {
-        const item: ExtractedItem = {};
-        
-        children.forEach((child) => {
-            const value = extractChildValue(rootElement as HTMLElement, child);
-            item[child.name] = value;
+    try {
+        const rootElements = document.querySelectorAll(rootSelector);
+        rootElements.forEach((rootElement) => {
+            const item: ExtractedItem = {};
+            children.forEach((child) => {
+                try {
+                    const value = extractChildValue(rootElement as HTMLElement, child);
+                    item[child.name] = value;
+                } catch (error) {
+                    console.warn(`Invalid child selector "${child.path}": ${error}`);
+                    item[child.name] = null;
+                }
+            });
+            items.push(item);
         });
-        
-        items.push(item);
-    });
+    } catch (error) {
+        console.error(`Invalid root selector "${rootSelector}": ${error}`);
+        throw error;
+    }
     
     return items;
 }
@@ -57,17 +77,19 @@ function extractChildValue(rootElement: HTMLElement, child: ChildElement): any {
     if (selector === 'self') {
         return extractElementData(rootElement, child);
     }
-    
-    // Query within root element
-    if (child.isList) {
-        // Multiple elements
-        const elements = Array.from(rootElement.querySelectorAll(selector));
-        return elements.map(el => extractElementData(el as HTMLElement, child));
-    } else {
-        // Single element
-        const element = rootElement.querySelector(selector);
-        if (!element) return null;
-        return extractElementData(element as HTMLElement, child);
+
+    try {
+        if (child.isList) {
+            const elements = Array.from(rootElement.querySelectorAll(selector));
+            return elements.map(el => extractElementData(el as HTMLElement, child));
+        } else {
+            const element = rootElement.querySelector(selector);
+            if (!element) return null;
+            return extractElementData(element as HTMLElement, child);
+        }
+    } catch (error) {
+        console.warn(`Invalid selector "${selector}": ${error}`);
+        return null;
     }
 }
 
@@ -193,13 +215,7 @@ export function generateRootSelector(element: HTMLElement): string {
     // Try classes
     if (element.className && element.className.trim()) {
         const classes = element.className.trim().split(/\s+/);
-        // Filter out Tailwind classes
-        const semanticClasses = classes.filter(cls => {
-            if (/^(sm|md|lg|xl|2xl|p-|m-|bg-|border-|text-|hover|focus)/i.test(cls)) {
-                return false;
-            }
-            return true;
-        });
+        const semanticClasses = classes.filter(isSemanticClass);
         
         if (semanticClasses.length > 0) {
             return `.${semanticClasses.join('.')}`;

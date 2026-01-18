@@ -5,3 +5,5 @@ export type RootElement = {
     attributes?: Record<string, string>;
     identifiedBy: 'id' | 'class' | 'attribute' | 'tagName';
 }
+
+

@@ -6,6 +6,8 @@ export type PickedElement = {
   textContent: string
   href?: string | null
   src?: string | null
+  selector: string
+  index: number
 }
 
 export type ElementType = 'text' | 'image' | 'link'

@@ -12,6 +12,7 @@ import {
 
 type Props = {
     rootElement: HTMLElement | null;
+    rootSelector: string;
     childElements: ChildElement[];
     paginationConfig: PaginationConfigType | null;
 }
@@ -27,6 +28,7 @@ type ExtractionState = {
 
 export const PreviewExecution = ({
     rootElement,
+    rootSelector,
     childElements,
     paginationConfig,
 }: Props) => {
@@ -58,8 +60,9 @@ export const PreviewExecution = ({
         }));
 
         try {
-            const rootSelector = generateRootSelector(rootElement!);
-            const preview = extractFromCurrentPage(rootSelector, childElements);
+            // Use the custom selector if available, otherwise generate one
+            const selector = rootSelector || generateRootSelector(rootElement!);
+            const preview = extractFromCurrentPage(selector, childElements);
             
             setExtractionState(prev => ({
                 ...prev,
@@ -98,7 +101,8 @@ export const PreviewExecution = ({
         }));
 
         try {
-            const rootSelector = generateRootSelector(rootElement!);
+            // Use the custom selector if available, otherwise generate one
+            const selector = rootSelector || generateRootSelector(rootElement!);
             const startPage = getStartPage(paginationConfig!.pageParamValue);
             const maxPages = paginationConfig!.maxPages;
             const allData: ExtractedItem[] = [];
@@ -121,7 +125,7 @@ export const PreviewExecution = ({
                 const doc = parser.parseFromString(html, 'text/html');
                 
                 // Extract data from fetched page
-                const rootElements = doc.querySelectorAll(rootSelector);
+                const rootElements = doc.querySelectorAll(selector);
                 console.log()
                 console.log(rootElement);
                 rootElements.forEach((rootElem) => {
@@ -183,55 +187,55 @@ export const PreviewExecution = ({
     };
 
     return (
-        <div className="step-container">
-            <div className="step-header">
+        <div className="crx-ext-step-container">
+            <div className="crx-ext-step-header">
                 <h2>Step 4: Preview & Execute</h2>
-                <p className="step-description">
+                <p className="crx-ext-step-description">
                     Preview sample data or execute full extraction across all pages.
                 </p>
             </div>
 
-            <div className="execution-panel">
+            <div className="crx-ext-execution-panel">
                 {/* Configuration Summary */}
-                <div className="config-summary">
+                <div className="crx-ext-config-summary">
                     <h3>Configuration Summary</h3>
-                    <div className="summary-items">
-                        <div className="summary-item">
-                            <span className="label">Root Elements:</span>
-                            <span className="value">{rootElement?.tagName.toLowerCase() || 'None'}</span>
+                    <div className="crx-ext-summary-items">
+                        <div className="crx-ext-summary-item">
+                            <span className="crx-ext-label">Root Elements:</span>
+                            <span className="crx-ext-value">{rootElement?.tagName.toLowerCase() || 'None'}</span>
                         </div>
-                        <div className="summary-item">
-                            <span className="label">Child Fields:</span>
-                            <span className="value">{childElements.length}</span>
+                        <div className="crx-ext-summary-item">
+                            <span className="crx-ext-label">Child Fields:</span>
+                            <span className="crx-ext-value">{childElements.length}</span>
                         </div>
-                        <div className="summary-item">
-                            <span className="label">Pages to Fetch:</span>
-                            <span className="value">{paginationConfig?.maxPages || 0}</span>
+                        <div className="crx-ext-summary-item">
+                            <span className="crx-ext-label">Pages to Fetch:</span>
+                            <span className="crx-ext-value">{paginationConfig?.maxPages || 0}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Error Display */}
                 {extractionState.error && (
-                    <div className="error-message">
+                    <div className="crx-ext-error-message">
                         <strong>Error:</strong> {extractionState.error}
                     </div>
                 )}
 
                 {/* Preview Data */}
                 {extractionState.previewData.length > 0 && (
-                    <div className="preview-section">
+                    <div className="crx-ext-preview-section">
                         <h3>Preview (First 5 Items)</h3>
-                        <div className="data-table">
-                            <div className="table-header">
+                        <div className="crx-ext-data-table">
+                            <div className="crx-ext-table-header">
                                 {childElements.map(child => (
-                                    <div key={child.id} className="table-cell">{child.name}</div>
+                                    <div key={child.id} className="crx-ext-table-cell">{child.name}</div>
                                 ))}
                             </div>
                             {extractionState.previewData.map((item, idx) => (
-                                <div key={idx} className="table-row">
+                                <div key={idx} className="crx-ext-table-row">
                                     {childElements.map(child => (
-                                        <div key={`${idx}-${child.id}`} className="table-cell">
+                                        <div key={`${idx}-${child.id}`} className="crx-ext-table-cell">
                                             <code>{formatValue(item[child.name])}</code>
                                         </div>
                                     ))}
@@ -243,17 +247,17 @@ export const PreviewExecution = ({
 
                 {/* Extraction Progress */}
                 {extractionState.status === 'extracting' && (
-                    <div className="progress-section">
+                    <div className="crx-ext-progress-section">
                         <h3>Extraction Progress</h3>
-                        <div className="progress-bar">
+                        <div className="crx-ext-progress-bar">
                             <div
-                                className="progress-fill"
+                                className="crx-ext-progress-fill"
                                 style={{
                                     width: `${(extractionState.currentPage / extractionState.totalPages) * 100}%`,
                                 }}
                             ></div>
                         </div>
-                        <div className="progress-text">
+                        <div className="crx-ext-progress-text">
                             Page {extractionState.currentPage} of {extractionState.totalPages}
                             ({extractionState.totalData.length} items extracted)
                         </div>
@@ -262,12 +266,12 @@ export const PreviewExecution = ({
 
                 {/* Results */}
                 {extractionState.status === 'completed' && (
-                    <div className="results-section">
+                    <div className="crx-ext-results-section">
                         <h3>Extraction Complete</h3>
-                        <div className="results-summary">
+                        <div className="crx-ext-results-summary">
                             <span>Total Items Extracted: <strong>{extractionState.totalData.length}</strong></span>
                         </div>
-                        <div className="results-preview">
+                        <div className="crx-ext-results-preview">
                             <h4>Sample Results</h4>
                             <pre>{JSON.stringify(extractionState.totalData.slice(0, 2), null, 2)}</pre>
                         </div>
@@ -275,16 +279,16 @@ export const PreviewExecution = ({
                 )}
 
                 {/* Action Buttons */}
-                <div className="action-buttons">
+                <div className="crx-ext-action-buttons">
                     <button
-                        className="btn btn-primary"
+                        className="crx-ext-btn crx-ext-btn-primary"
                         onClick={validateAndPreview}
                         disabled={extractionState.status === 'extracting' || extractionState.status === 'previewing'}
                     >
                         Preview Data
                     </button>
                     <button
-                        className="btn btn-primary"
+                        className="crx-ext-btn crx-ext-btn-primary"
                         onClick={executeExtraction}
                         disabled={
                             extractionState.status === 'extracting' ||
@@ -295,7 +299,7 @@ export const PreviewExecution = ({
                     </button>
                     {extractionState.status === 'completed' && (
                         <button
-                            className="btn btn-primary"
+                            className="crx-ext-btn crx-ext-btn-primary"
                             onClick={downloadData}
                         >
                             Download JSON

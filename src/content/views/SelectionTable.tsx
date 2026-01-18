@@ -21,7 +21,7 @@ function SelectionTable({ items, onRemove }: Props) {
         maxHeight: 400,
         overflowY: 'auto',
     }}>
-    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', overflow: 'auto' }}>
       <thead>
         <tr style={{ textAlign: 'left', borderBottom: '1px solid #ddd' }}>
           <th style={{ padding: '6px' }}>Name</th>

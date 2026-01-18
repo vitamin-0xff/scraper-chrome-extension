@@ -24,11 +24,30 @@ export function cleanTailwindClasses(className: string): string {
     
     const filtered = uniqueClasses.filter(cls => {
         if (!cls) return false;
-        // Filter out Tailwind utility classes
+        
+        // Filter out dark/light mode modifiers
         if (cls === 'dark' || cls === 'light') return false;
-        if (/^(sm|md|lg|xl|2xl|hover|focus|active|disabled|group|peer):/i.test(cls)) return false;
-        if (/^(transition|duration|ease|animate|p-|m-|px-|py-|pt-|pr-|pb-|pl-|mx-|my-|mt-|mr-|mb-|ml-|text-|bg-|border-|rounded-|shadow-|w-|h-|min-w-|min-h-|max-w-|max-h-|flex|grid|items-|justify-|content-|gap-|space-|place-|object-|overflow-|opacity-|z-|top-|left-|right-|bottom-|inset-|font-|leading-|tracking-|underline|decoration-|sr-only|visible|invisible|cursor-|select-|pointer-events-|resize-|list-|table-|order-|scale-|rotate-|translate-|skew-|origin-|ring-|stroke-|fill-)/i.test(cls)) return false;
-        if (/\/\d+$/.test(cls)) return false;
+        
+        // Filter out responsive prefixes (sm:, md:, lg:, etc.)
+        if (/^(sm|md|lg|xl|2xl):/i.test(cls)) return false;
+        
+        // Filter out state prefixes (hover:, focus:, active:, etc.)
+        if (/^(hover|focus|active|disabled|group|peer|dark):/i.test(cls)) return false;
+        
+        // Filter out Tailwind utility class patterns (includes those with slashes and fractions)
+        // This catches: bg-, text-, border-, p-, m-, w-, h-, rounded-, shadow-, grid-, flex-, etc.
+        if (/^(transition|duration|ease|animate|p-|m-|px-|py-|pt-|pr-|pb-|pl-|mx-|my-|mt-|mr-|mb-|ml-|text-|bg-|border-|rounded-|shadow-|w-|h-|min-w-|min-h-|max-w-|max-h-|flex|grid|items-|justify-|content-|gap-|space-|place-|object-|overflow-|opacity-|z-|top-|left-|right-|bottom-|inset-|font-|leading-|tracking-|underline|decoration-|sr-only|visible|invisible|cursor-|select-|pointer-events-|resize-|list-|table-|order-|scale-|rotate-|translate-|skew-|origin-|ring-|stroke-|fill-|from-|to-|via-)/i.test(cls)) {
+            return false;
+        }
+        
+        // Filter out classes with slashes or fractions (e.g., from-blue-50/40)
+        if (/\//.test(cls)) return false;
+        
+        // Filter out classes that look like they contain Tailwind gradient or color modifiers
+        if (/\d+$/.test(cls) && /^(gray|red|blue|green|yellow|purple|pink|indigo|cyan|lime|amber|orange|rose|teal|violet|fuchsia)/.test(cls)) {
+            return false;
+        }
+        
         return true;
     });
     

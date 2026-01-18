@@ -34,7 +34,18 @@ export const SelectChildren = ({
     });
 
     const { startPicker } = useElementPicker(
-        (pickedElement, nativeElement) => {
+        (pickedElement) => {
+            console.log('Child element picked - Selector:', pickedElement.selector, 'Index:', pickedElement.index);
+            
+            // Get the native element using selector and index
+            const allMatching = document.querySelectorAll(pickedElement.selector);
+            const nativeElement = allMatching[pickedElement.index] as HTMLElement;
+            
+            if (!nativeElement) {
+                console.error('Could not find element with selector:', pickedElement.selector, 'at index:', pickedElement.index);
+                return;
+            }
+            
             setSelectedChild(pickedElement);
             const path = generateRelativePath(rootElement, nativeElement);
             setChildPath(path);
@@ -126,33 +137,33 @@ export const SelectChildren = ({
     };
 
     return (
-        <div className="step-container">
-            <div className="step-header">
+        <div className="crx-ext-step-container">
+            <div className="crx-ext-step-header">
                 <h2>Step 2: Select Child Elements</h2>
-                <p className="step-description">
+                <p className="crx-ext-step-description">
                     Select the individual elements within each root element that you want to extract.
                 </p>
             </div>
 
             {!rootElement ? (
-                <div className="warning-message">
+                <div className="crx-ext-warning-message">
                     <p>Please complete Step 1 first. Select a root element to continue.</p>
                 </div>
             ) : (
                 <>
                     {/* Child Element Picker Form */}
-                    <div className="child-form">
-                        <div className="form-section">
+                    <div className="crx-ext-child-form">
+                        <div className="crx-ext-form-section">
                             <h3>Pick a Child Element</h3>
                             
                             {selectedChild && (
-                                <div className="selected-child-preview">
+                                <div className="crx-ext-selected-child-preview">
                                     <h4>Selected Child Element</h4>
                                     <SelectedElementInfo element={selectedChild} />
                                 </div>
                             )}
 
-                            <div className="form-group">
+                            <div className="crx-ext-form-group">
                                 <label>Element Name</label>
                                 <input
                                     type="text"
@@ -162,8 +173,8 @@ export const SelectChildren = ({
                                 />
                             </div>
 
-                            <div className="form-row">
-                                <div className="form-group">
+                            <div className="crx-ext-form-row">
+                                <div className="crx-ext-form-group">
                                     <label>Element Type</label>
                                     <select value={childType} onChange={(e) => {
                                         const newType = e.target.value as ElementType;
@@ -176,7 +187,7 @@ export const SelectChildren = ({
                                     </select>
                                 </div>
 
-                                <div className="form-group">
+                                <div className="crx-ext-form-group">
                                     <label>
                                         <input
                                             type="checkbox"
@@ -188,7 +199,7 @@ export const SelectChildren = ({
                                 </div>
                             </div>
 
-                            <div className="form-group">
+                            <div className="crx-ext-form-group">
                                 <label>Unique Path</label>
                                 <textarea
                                     value={childPath}
@@ -199,11 +210,11 @@ export const SelectChildren = ({
                             </div>
 
                             {/* Extraction Options based on type */}
-                            <div className="extraction-options">
+                            <div className="crx-ext-extraction-options">
                                 <h4>Extract Options</h4>
                                 
                                 {(childType === 'text' || childType === 'link') && (
-                                    <label className="checkbox-label">
+                                    <label className="crx-ext-checkbox-label">
                                         <input
                                             type="checkbox"
                                             checked={extractOptions.extractText}
@@ -217,7 +228,7 @@ export const SelectChildren = ({
                                 )}
 
                                 {childType === 'link' && (
-                                    <label className="checkbox-label">
+                                    <label className="crx-ext-checkbox-label">
                                         <input
                                             type="checkbox"
                                             checked={extractOptions.extractHref}
@@ -232,7 +243,7 @@ export const SelectChildren = ({
 
                                 {childType === 'image' && (
                                     <>
-                                        <label className="checkbox-label">
+                                        <label className="crx-ext-checkbox-label">
                                             <input
                                                 type="checkbox"
                                                 checked={extractOptions.extractSrc}
@@ -243,7 +254,7 @@ export const SelectChildren = ({
                                             />
                                             Extract src Attribute
                                         </label>
-                                        <label className="checkbox-label">
+                                        <label className="crx-ext-checkbox-label">
                                             <input
                                                 type="checkbox"
                                                 checked={extractOptions.extractAlt}
@@ -258,16 +269,16 @@ export const SelectChildren = ({
                                 )}
                             </div>
 
-                            <div className="form-actions">
+                            <div className="crx-ext-form-actions">
                                 <button
-                                    className="btn btn-primary"
+                                    className="crx-ext-btn crx-ext-btn-primary"
                                     disabled={picking}
                                     onClick={handleStartPicking}
                                 >
                                     {picking ? "Picking..." : "Pick Child Element"}
                                 </button>
                                 <button
-                                    className="btn btn-primary"
+                                    className="crx-ext-btn crx-ext-btn-primary"
                                     onClick={handleAddChild}
                                     disabled={!selectedChild || !childName.trim()}
                                 >
@@ -275,7 +286,7 @@ export const SelectChildren = ({
                                 </button>
                                 {selectedChild && (
                                     <button
-                                        className="btn btn-secondary"
+                                        className="crx-ext-btn crx-ext-btn-secondary"
                                         onClick={resetForm}
                                     >
                                         Clear
@@ -287,33 +298,33 @@ export const SelectChildren = ({
 
                     {/* Children List */}
                     {childrenElements.length > 0 && (
-                        <div className="children-list">
+                        <div className="crx-ext-children-list">
                             <h3>Selected Child Elements ({childrenElements.length})</h3>
-                            <div className="list-container">
+                            <div className="crx-ext-list-container">
                                 {childrenElements.map((child) => (
-                                    <div key={child.id} className="child-item">
-                                        <div className="child-header">
-                                            <div className="child-info">
-                                                <span className="child-name">{child.name}</span>
-                                                <span className="child-type">{child.type}</span>
-                                                {child.isList && <span className="child-list-badge">List</span>}
+                                    <div key={child.id} className="crx-ext-child-item">
+                                        <div className="crx-ext-child-header">
+                                            <div className="crx-ext-child-info">
+                                                <span className="crx-ext-child-name">{child.name}</span>
+                                                <span className="crx-ext-child-type">{child.type}</span>
+                                                {child.isList && <span className="crx-ext-child-list-badge">List</span>}
                                             </div>
                                             <button
-                                                className="btn btn-delete"
+                                                className="crx-ext-btn crx-ext-btn-delete"
                                                 onClick={() => onChildElementRemoved(child.id)}
                                             >
                                                 Remove
                                             </button>
                                         </div>
-                                        <div className="child-path">
+                                        <div className="crx-ext-child-path">
                                             <code>{child.path}</code>
                                         </div>
                                         {(child.extractText || child.extractHref || child.extractSrc || child.extractAlt) && (
-                                            <div className="child-extracts">
-                                                {child.extractText && <span className="extract-badge">Text</span>}
-                                                {child.extractHref && <span className="extract-badge">Href</span>}
-                                                {child.extractSrc && <span className="extract-badge">Src</span>}
-                                                {child.extractAlt && <span className="extract-badge">Alt</span>}
+                                            <div className="crx-ext-child-extracts">
+                                                {child.extractText && <span className="crx-ext-extract-badge">Text</span>}
+                                                {child.extractHref && <span className="crx-ext-extract-badge">Href</span>}
+                                                {child.extractSrc && <span className="crx-ext-extract-badge">Src</span>}
+                                                {child.extractAlt && <span className="crx-ext-extract-badge">Alt</span>}
                                             </div>
                                         )}
                                     </div>

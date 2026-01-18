@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import TabNav, { StatusTab } from './TabNav';
 import { SelectRootElement } from './steps/SelectRootElement';
@@ -13,6 +13,7 @@ function App() {
   const [show, setShow] = useState(false)
   const [currentActiveTab, setCurrentActiveTab] = useState<StatusTab>('root');
   const [rootNativeElement, setRootNativeElement] = useState<HTMLElement | null>(null);
+  const [rootSelector, setRootSelector] = useState<string>('');
   const [childElements, setChildElements] = useState<ChildElement[]>([]);
   const [paginationConfig, setPaginationConfig] = useState<PaginationConfig | null>(null);
   
@@ -30,16 +31,33 @@ function App() {
     setPaginationConfig(config);
   };
 
+  const onRootElementSelected = (rootElement: HTMLElement | null, selector?: string) => {
+    console.log("Root Element Changed");
+    setRootNativeElement(rootElement);
+    if (selector) {
+      setRootSelector(selector);
+    }
+  }
+
+  useEffect(() => {
+    console.log("Root Element Updated:", rootNativeElement);
+    console.log("Root Selector Updated:", rootSelector);
+  }, [rootNativeElement, rootSelector]);
+
   return (
-    <div className="popup-container root-ext">
+    <div className="crx-ext-popup-container crx-ext-root-ext">
       {show && (
-        <div className="popup-card popup-content" style={{
+        <div className="crx-ext-popup-card crx-ext-popup-content" style={{
           maxHeight: '60vh',
           overflowY: 'auto'
         }}>
           <TabNav activeTab={currentActiveTab} onTabChange={setCurrentActiveTab} />
           {currentActiveTab === 'root' && (
-            <SelectRootElement rootElement={rootNativeElement} onRootElementSelected={setRootNativeElement} />
+            <SelectRootElement 
+              rootElement={rootNativeElement} 
+              rootSelector={rootSelector}
+              onRootElementSelected={onRootElementSelected}
+            />
           )}
           {currentActiveTab === 'children' && (
             <SelectChildren 
@@ -58,14 +76,15 @@ function App() {
           {currentActiveTab === 'preview' && (
             <PreviewExecution 
               rootElement={rootNativeElement}
+              rootSelector={rootSelector}
               childElements={childElements}
               paginationConfig={paginationConfig}
             />
           )}
     </div>
   )}
-      <button className="toggle-button" onClick={toggle}>
-        <img src={Logo} alt="CRXJS logo" className="button-icon" />
+      <button className="crx-ext-toggle-button" onClick={toggle}>
+        <img src={Logo} alt="CRXJS logo" className="crx-ext-button-icon" />
       </button>
   </div>
   )

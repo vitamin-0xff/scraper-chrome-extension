@@ -52,19 +52,19 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
     const isValid = baseUrl.trim() && pageParam.trim() && maxPages > 0;
 
     return (
-        <div className="step-container">
-            <div className="step-header">
+        <div className="crx-ext-step-container">
+            <div className="crx-ext-step-header">
                 <h2>Step 3: Configure Pagination</h2>
-                <p className="step-description">
+                <p className="crx-ext-step-description">
                     Set up how to iterate through multiple pages of results.
                 </p>
             </div>
 
-            <div className="pagination-form">
-                <div className="form-section">
+            <div className="crx-ext-pagination-form">
+                <div className="crx-ext-form-section">
                     <h3>URL Configuration</h3>
 
-                    <div className="form-group">
+                    <div className="crx-ext-form-group">
                         <label>Base URL</label>
                         <input
                             type="url"
@@ -74,8 +74,8 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
                         />
                     </div>
 
-                    <div className="form-row">
-                        <div className="form-group">
+                    <div className="crx-ext-form-row">
+                        <div className="crx-ext-form-group">
                             <label>Page Parameter Name</label>
                             <input
                                 type="text"
@@ -85,7 +85,7 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
                             />
                         </div>
 
-                        <div className="form-group">
+                        <div className="crx-ext-form-group">
                             <label>Starting Value</label>
                             <input
                                 type="text"
@@ -95,7 +95,7 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
                             />
                         </div>
 
-                        <div className="form-group">
+                        <div className="crx-ext-form-group">
                             <label>Max Pages</label>
                             <input
                                 type="number"
@@ -108,9 +108,9 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
 
                     <h3>Additional Parameters</h3>
 
-                    <div className="params-input">
-                        <div className="form-row">
-                            <div className="form-group">
+                    <div className="crx-ext-params-input">
+                        <div className="crx-ext-form-row">
+                            <div className="crx-ext-form-group">
                                 <label>Parameter Name</label>
                                 <input
                                     type="text"
@@ -120,7 +120,7 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
                                 />
                             </div>
 
-                            <div className="form-group">
+                            <div className="crx-ext-form-group">
                                 <label>Parameter Value</label>
                                 <input
                                     type="text"
@@ -131,7 +131,7 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
                             </div>
 
                             <button
-                                className="btn btn-primary"
+                                className="crx-ext-btn crx-ext-btn-primary"
                                 onClick={handleAddParam}
                                 disabled={!newParamKey.trim() || !newParamValue.trim()}
                             >
@@ -141,14 +141,14 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
                     </div>
 
                     {otherParams.length > 0 && (
-                        <div className="params-list">
+                        <div className="crx-ext-params-list">
                             <h4>Added Parameters</h4>
-                            <div className="param-items">
+                            <div className="crx-ext-param-items">
                                 {otherParams.map((param, index) => (
-                                    <div key={index} className="param-item">
+                                    <div key={index} className="crx-ext-param-item">
                                         <code>{param}</code>
                                         <button
-                                            className="btn btn-delete"
+                                            className="crx-ext-btn crx-ext-btn-delete"
                                             onClick={() => handleRemoveParam(index)}
                                         >
                                             Remove
@@ -159,10 +159,10 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
                         </div>
                     )}
 
-                    <div className="config-preview">
+                    <div className="crx-ext-config-preview">
                         <h4>URL Preview</h4>
-                        <div className="preview-urls">
-                            <code className="preview-url">
+                        <div className="crx-ext-preview-urls">
+                            <code className="crx-ext-preview-url">
                                 {baseUrl}?{pageParam}={pageParamValue}
                                 {otherParams.length > 0 && (
                                     <>
@@ -170,7 +170,7 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
                                     </>
                                 )}
                             </code>
-                            <code className="preview-url">
+                            <code className="crx-ext-preview-url">
                                 {baseUrl}?{pageParam}={parseInt(pageParamValue) + 1}
                                 {otherParams.length > 0 && (
                                     <>
@@ -178,7 +178,7 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
                                     </>
                                 )}
                             </code>
-                            <code className="preview-url">
+                            <code className="crx-ext-preview-url">
                                 {baseUrl}?{pageParam}={parseInt(pageParamValue) + maxPages - 1}
                                 {otherParams.length > 0 && (
                                     <>
@@ -189,9 +189,9 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
                         </div>
                     </div>
 
-                    <div className="form-actions">
+                    <div className="crx-ext-form-actions">
                         <button
-                            className="btn btn-primary"
+                            className="crx-ext-btn crx-ext-btn-primary"
                             onClick={handleApplyConfig}
                             disabled={!isValid}
                         >
