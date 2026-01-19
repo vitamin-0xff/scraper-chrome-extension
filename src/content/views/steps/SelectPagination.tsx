@@ -1,26 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePaginationStore } from "../store";
+import { type PaginationConfig } from "../algorithms/extractionEngine";
 
-type PaginationConfig = {
-    baseUrl: string;
-    pageParam: string;
-    pageParamValue: string;
-    maxPages: number;
-    otherParams: Record<string, string>;
-}
-
-type Props = {
-    onConfigChange: (config: PaginationConfig) => void;
-    initialConfig?: Partial<PaginationConfig>;
-}
-
-export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
-    const [baseUrl, setBaseUrl] = useState(initialConfig?.baseUrl || '');
-    const [pageParam, setPageParam] = useState(initialConfig?.pageParam || 'page');
-    const [pageParamValue, setPageParamValue] = useState(initialConfig?.pageParamValue || '1');
-    const [maxPages, setMaxPages] = useState(initialConfig?.maxPages || 10);
+export const SelectPagination = () => {
+    const paginationConfig = usePaginationStore((state) => state.paginationConfig);
+    const setPaginationConfig = usePaginationStore((state) => state.setPaginationConfig);
+    
+    const [baseUrl, setBaseUrl] = useState(paginationConfig?.baseUrl || '');
+    const [pageParam, setPageParam] = useState(paginationConfig?.pageParam || 'page');
+    const [pageParamValue, setPageParamValue] = useState(paginationConfig?.pageParamValue || '1');
+    const [maxPages, setMaxPages] = useState(paginationConfig?.maxPages || 10);
     const [otherParams, setOtherParams] = useState<string[]>([]);
     const [newParamKey, setNewParamKey] = useState('');
     const [newParamValue, setNewParamValue] = useState('');
+
+    useEffect(() => {
+        if (paginationConfig) {
+            setBaseUrl(paginationConfig.baseUrl);
+            setPageParam(paginationConfig.pageParam);
+            setPageParamValue(paginationConfig.pageParamValue);
+            setMaxPages(paginationConfig.maxPages);
+            // Reconstruct otherParams from the config object
+            const params = Object.entries(paginationConfig.otherParams || {})
+                .map(([key, value]) => `${key}=${value}`);
+            setOtherParams(params);
+        }
+    }, [paginationConfig]);
 
     const handleAddParam = () => {
         if (newParamKey.trim() && newParamValue.trim()) {
@@ -46,7 +51,7 @@ export const SelectPagination = ({ onConfigChange, initialConfig }: Props) => {
                 return acc;
             }, {} as Record<string, string>),
         };
-        onConfigChange(config);
+        setPaginationConfig(config);
     };
 
     const isValid = baseUrl.trim() && pageParam.trim() && maxPages > 0;

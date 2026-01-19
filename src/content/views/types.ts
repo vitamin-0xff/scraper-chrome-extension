@@ -1,6 +1,5 @@
 export type PickedElement = {
   tagName: string
-  id: string | null
   className: string | null
   outerHTML: string
   textContent: string

@@ -13,7 +13,6 @@ export const FetchPatternDetection = ({defaultBaseUrl, defaultOtherParams, defau
     const LOG = (...data: any[]) => {
         console.log('Fetch pattern detected', ...data);
     }
-    const [elementPicked, setElementPicked] = useState<PickedElement | null>(null);
     const [isPickingElement, setIsPickingElement] = useState(false);
     const [baseUrl, setBaseUrl] = useState(defaultBaseUrl);
     const [pageParam, setPageParam] = useState(defaultPageParam);
@@ -33,14 +32,13 @@ export const FetchPatternDetection = ({defaultBaseUrl, defaultOtherParams, defau
         const url = new URL(element.href, window.location.href);
         const params = new URLSearchParams(url.search);
         let detectedParam = '';
-        params.forEach((value, key) => {
+        params.forEach((_value, key) => {
             if (/\b(page|p|pg|pagination)\b/i.test(key)) {
                 detectedParam = key;
             }
         });
         setBaseUrl(url.origin + url.pathname);
         setPageParam(detectedParam);
-        setElementPicked(element);
         const otherParamsArr: string[] = [];
         params.forEach((value, key) => {
             if (key !== detectedParam) {

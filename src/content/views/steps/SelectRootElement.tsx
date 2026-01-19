@@ -3,14 +3,13 @@ import { useElementPicker } from "../useElementPicker";
 import SelectedElementInfo from "../SelectedElementInfo";
 import { PickedElement } from "../types";
 import { calculateRootElementStats, RootElementStats } from "../algorithms/rootElementAlgorithms";
+import { useRootElementStore } from "../store";
 
-type Props = {
-    onRootElementSelected: (element: HTMLElement | null, selector?: string) => void;
-    rootElement: HTMLElement | null;
-    rootSelector?: string;
-}
-
-export const SelectRootElement = ({rootElement, rootSelector, onRootElementSelected}: Props) => {
+export const SelectRootElement = () => {
+    const rootElementInfo = useRootElementStore((state) => state.rootElementInfo);
+    const setRootElementInfo = useRootElementStore((state) => state.setRootElementInfo);
+    const clearRootElementInfo = useRootElementStore((state) => state.clearRootElementInfo);
+    
     const [pickedElement, setPickedElement] = useState<PickedElement | null>(null);
     const [picking, setPicking] = useState(false);
     const [stats, setStats] = useState<RootElementStats | null>(null);
@@ -18,54 +17,46 @@ export const SelectRootElement = ({rootElement, rootSelector, onRootElementSelec
     const [editedSelector, setEditedSelector] = useState('');
     const [selectorError, setSelectorError] = useState('');
 
-    // Sync local state when rootElement changes or on mount
-
+    // Sync local state when rootElementInfo changes
     useEffect(() => {
-        console.log("root Element has changed");
-        console.log(rootElement);
-    }, [rootElement])
-
-    useEffect(() => {
-        if (rootElement) {
-            // Recalculate stats
-            const elementStats = calculateRootElementStats(rootElement);
-            // Use the persisted selector from parent if available, otherwise use calculated one
-            const selectorToUse = rootSelector || elementStats.selector;
+        if (rootElementInfo) {
+            const { selector, index } = rootElementInfo;
             
-            // Find index of the rootElement within all matching elements
-            const allMatching = document.querySelectorAll(selectorToUse);
-            const elementIndex = Array.from(allMatching).indexOf(rootElement);
+            // Find the element using selector and index
+            const allMatching = document.querySelectorAll(selector);
+            const rootElement = allMatching[index] as HTMLElement | undefined;
             
-            // Reconstruct pickedElement from rootElement
-            const reconstructedPickedElement: PickedElement = {
-                tagName: rootElement.tagName,
-                id: rootElement.id || null,
-                className: rootElement.className || null,
-                outerHTML: rootElement.outerHTML,
-                textContent: rootElement.textContent || '',
-                href: rootElement.getAttribute('href'),
-                src: rootElement.getAttribute('src'),
-                selector: selectorToUse,
-                index: elementIndex
-            };
-            setPickedElement(reconstructedPickedElement);
-            
-            setStats({
-                ...elementStats,
-                selector: selectorToUse
-            });
-            setEditedSelector(selectorToUse);
-            setIsEditingSelector(false);
-            setSelectorError('');
-        } else if (!rootElement) {
-            // Clear local state when root is cleared
+            if (rootElement) {
+                const elementStats = calculateRootElementStats(rootElement);
+                
+                const reconstructedPickedElement: PickedElement = {
+                    tagName: rootElement.tagName,
+                    className: rootElement.className || null,
+                    outerHTML: rootElement.outerHTML,
+                    textContent: rootElement.textContent || '',
+                    href: rootElement.getAttribute('href'),
+                    src: rootElement.getAttribute('src'),
+                    selector: selector,
+                    index: index
+                };
+                setPickedElement(reconstructedPickedElement);
+                
+                setStats({
+                    ...elementStats,
+                    selector: selector
+                });
+                setEditedSelector(selector);
+                setIsEditingSelector(false);
+                setSelectorError('');
+            }
+        } else {
             setPickedElement(null);
             setStats(null);
             setEditedSelector('');
             setIsEditingSelector(false);
             setSelectorError('');
         }
-    }, [rootElement, rootSelector]);
+    }, [rootElementInfo]);
 
     const {startPicker} = useElementPicker(
         (pickedElement) => {
@@ -87,7 +78,7 @@ export const SelectRootElement = ({rootElement, rootSelector, onRootElementSelec
                 ...elementStats,
                 selector: pickedElement.selector
             };
-            onRootElementSelected(nativeElement, pickedElement.selector);
+            setRootElementInfo(pickedElement.selector, pickedElement.index);
             setPickedElement(pickedElement);
             setPicking(false);
             
@@ -108,7 +99,7 @@ export const SelectRootElement = ({rootElement, rootSelector, onRootElementSelec
     }
 
     const handleClearRoot = () => {
-        onRootElementSelected(null as any);
+        clearRootElementInfo();
         setPickedElement(null);
         setStats(null);
         setIsEditingSelector(false);
@@ -143,7 +134,6 @@ export const SelectRootElement = ({rootElement, rootSelector, onRootElementSelec
             // Update picked element info
             const newPickedElement: PickedElement = {
                 tagName: firstElement.tagName,
-                id: firstElement.id || null,
                 className: firstElement.className || null,
                 outerHTML: firstElement.outerHTML,
                 textContent: firstElement.textContent || '',
@@ -165,8 +155,8 @@ export const SelectRootElement = ({rootElement, rootSelector, onRootElementSelec
             return state;
         });
 
-            // Notify parent with both element and selector
-            onRootElementSelected(firstElement, editedSelector);
+            // Store root element info in global state
+            setRootElementInfo(editedSelector, 0);
             
             setIsEditingSelector(false);
             setSelectorError('');
@@ -192,7 +182,7 @@ export const SelectRootElement = ({rootElement, rootSelector, onRootElementSelec
                 </p>
             </div>
 
-            {rootElement && pickedElement ? (
+            {rootElementInfo && pickedElement ? (
                 <div className="crx-ext-root-element-card">
                     <div className="crx-ext-element-preview">
                         <h3>Selected Root Element</h3>

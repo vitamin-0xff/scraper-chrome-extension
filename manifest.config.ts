@@ -33,7 +33,6 @@ export default defineManifest({
   background: {
     service_worker: 'src/background.ts',
   },
-  devtools_page: 'src/devtools/index.html',
   side_panel: {
     default_path: 'src/sidepanel/index.html',
   },

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ChildElement } from "../types";
 import {
     validateConfig,
@@ -6,103 +5,67 @@ import {
     extractFromCurrentPage,
     buildPageUrl,
     getStartPage,
-    type PaginationConfig as PaginationConfigType,
     type ExtractedItem,
 } from "../algorithms/extractionEngine";
+import { useRootElementStore, useChildElementsStore, usePaginationStore, useExtractionDataStore } from "../store";
 
-type Props = {
-    rootElement: HTMLElement | null;
-    rootSelector: string;
-    childElements: ChildElement[];
-    paginationConfig: PaginationConfigType | null;
-}
+export const PreviewExecution = () => {
+    const rootElementInfo = useRootElementStore((state) => state.rootElementInfo);
+    const childElements = useChildElementsStore((state) => state.childElements);
+    const paginationConfig = usePaginationStore((state) => state.paginationConfig);
+    const extractionState = useExtractionDataStore((state) => state.extractionState);
+    const setExtractionStatus = useExtractionDataStore((state) => state.setExtractionStatus);
+    const setPreviewData = useExtractionDataStore((state) => state.setPreviewData);
+    const setTotalData = useExtractionDataStore((state) => state.setTotalData);
+    const setCurrentPage = useExtractionDataStore((state) => state.setCurrentPage);
+    const setTotalPages = useExtractionDataStore((state) => state.setTotalPages);
+    const setExtractionError = useExtractionDataStore((state) => state.setExtractionError);
 
-type ExtractionState = {
-    status: 'idle' | 'previewing' | 'extracting' | 'completed' | 'error';
-    previewData: ExtractedItem[];
-    totalData: ExtractedItem[];
-    currentPage: number;
-    totalPages: number;
-    error: string | null;
-}
-
-export const PreviewExecution = ({
-    rootElement,
-    rootSelector,
-    childElements,
-    paginationConfig,
-}: Props) => {
-    const [extractionState, setExtractionState] = useState<ExtractionState>({
-        status: 'idle',
-        previewData: [],
-        totalData: [],
-        currentPage: 0,
-        totalPages: 0,
-        error: null,
-    });
+    // Get root element from store
+    const rootElement = rootElementInfo ? (() => {
+        const { selector, index } = rootElementInfo;
+        const allMatching = document.querySelectorAll(selector);
+        return allMatching[index] as HTMLElement | null;
+    })() : null;
 
     const validateAndPreview = () => {
         const validation = validateConfig(rootElement, childElements, paginationConfig);
-        
         if (!validation.valid) {
-            setExtractionState(prev => ({
-                ...prev,
-                status: 'error',
-                error: validation.errors.join(', '),
-            }));
+            setExtractionStatus('error');
+            setExtractionError(validation.errors.join(', '));
             return;
         }
-
-        setExtractionState(prev => ({
-            ...prev,
-            status: 'previewing',
-            error: null,
-        }));
-
+        setExtractionStatus('previewing');
+        setExtractionError(null);
         try {
-            // Use the custom selector if available, otherwise generate one
-            const selector = rootSelector || generateRootSelector(rootElement!);
+            // Use the selector from store
+            const selector = rootElementInfo?.selector || generateRootSelector(rootElement!);
             const preview = extractFromCurrentPage(selector, childElements);
-            
-            setExtractionState(prev => ({
-                ...prev,
-                status: 'idle',
-                previewData: preview.slice(0, 5), // Show first 5 items
-                totalPages: paginationConfig!.maxPages,
-            }));
+            setPreviewData(preview.slice(0, 5)); // Show first 5 items
+            setTotalPages(paginationConfig!.maxPages);
+            setExtractionStatus('idle');
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : String(err);
-            setExtractionState(prev => ({
-                ...prev,
-                status: 'error',
-                error: `Preview failed: ${errorMsg}`,
-            }));
+            setExtractionStatus('error');
+            setExtractionError(`Preview failed: ${errorMsg}`);
         }
     };
-
+    
     const executeExtraction = async () => {
         const validation = validateConfig(rootElement, childElements, paginationConfig);
-        
         if (!validation.valid) {
-            setExtractionState(prev => ({
-                ...prev,
-                status: 'error',
-                error: validation.errors.join(', '),
-            }));
+            setExtractionStatus('error');
+            setExtractionError(validation.errors.join(', '));
             return;
         }
-
-        setExtractionState(prev => ({
-            ...prev,
-            status: 'extracting',
-            error: null,
-            totalData: [],
-            currentPage: 0,
-        }));
-
+        setExtractionStatus('extracting');
+        setExtractionError(null);
+        setTotalData([]);
+        setCurrentPage(0);
+        
         try {
-            // Use the custom selector if available, otherwise generate one
-            const selector = rootSelector || generateRootSelector(rootElement!);
+            // Use the selector from store
+            const selector = rootElementInfo?.selector || generateRootSelector(rootElement!);
             const startPage = getStartPage(paginationConfig!.pageParamValue);
             const maxPages = paginationConfig!.maxPages;
             const allData: ExtractedItem[] = [];
@@ -144,11 +107,8 @@ export const PreviewExecution = ({
                 });
 
                 // Update progress
-                setExtractionState(prev => ({
-                    ...prev,
-                    currentPage: i + 1,
-                    totalData: [...allData],
-                }));
+                setCurrentPage(i + 1);
+                setTotalData([...allData]);
 
                 // Add delay between requests (be nice to servers)
                 if (i < maxPages - 1) {
@@ -156,18 +116,12 @@ export const PreviewExecution = ({
                 }
             }
 
-            setExtractionState(prev => ({
-                ...prev,
-                status: 'completed',
-                totalData: allData,
-            }));
+            setExtractionStatus('completed');
+            setTotalData(allData);
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : String(err);
-            setExtractionState(prev => ({
-                ...prev,
-                status: 'error',
-                error: `Extraction failed: ${errorMsg}`,
-            }));
+            setExtractionStatus('error');
+            setExtractionError(`Extraction failed: ${errorMsg}`);
         }
     };
 

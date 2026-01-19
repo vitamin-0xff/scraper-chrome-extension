@@ -170,7 +170,7 @@ export function getStartPage(pageParamValue: string): number {
 export function validateConfig(
     rootElement: HTMLElement | null,
     children: ChildElement[],
-    config: PaginationConfig | null
+    config?: PaginationConfig
 ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
     

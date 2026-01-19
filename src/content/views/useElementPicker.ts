@@ -17,6 +17,14 @@ export function useElementPicker(
       [data-extractor-highlight] {
         outline: 3px solid #ff0000 !important;
         background-color: rgba(255, 0, 0, 0.1) !important;
+        transition: outline 120ms ease, background-color 120ms ease;
+      }
+      [data-extractor-selected] {
+        transform: scale(1.04);
+        transform-origin: center center;
+        transition: transform 120ms ease;
+        position: relative;
+        z-index: 999998 !important;
       }
       * {
         cursor: crosshair !important;
@@ -52,6 +60,9 @@ export function useElementPicker(
       document.querySelectorAll('[data-extractor-highlight]').forEach(el => {
         el.removeAttribute('data-extractor-highlight')
       })
+      document.querySelectorAll('[data-extractor-selected]').forEach(el => {
+        el.removeAttribute('data-extractor-selected')
+      })
 
       const styleEl = document.getElementById('extractor-picker-styles')
       if (styleEl) styleEl.remove()
@@ -77,7 +88,6 @@ export function useElementPicker(
         // Temporary object for tooltip - using type assertion to avoid creating full PickedElement
         const elementInfo = {
           tagName: target.tagName,
-          id: target.id || null,
           className: target.className || null,
           outerHTML: '',
           textContent: '',
@@ -104,6 +114,7 @@ export function useElementPicker(
       const target = e.target as HTMLElement
       if (!target) return
       console.log('Content Script: Element clicked:', target);
+      target.setAttribute('data-extractor-selected', 'true')
       
       // Generate selector for the element
       const selector = generateSelector(target);
@@ -114,7 +125,6 @@ export function useElementPicker(
       
       const elementData: PickedElement = {
         tagName: target.tagName,
-        id: target.id || null,
         className: target.className || null,
         outerHTML: target.outerHTML?.substring(0, 500) || '',
         textContent: target.textContent?.substring(0, 200) || '',

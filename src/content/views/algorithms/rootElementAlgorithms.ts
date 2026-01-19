@@ -72,9 +72,6 @@ export function getElementDepth(element: HTMLElement): number {
  * Priority: ID > Classes > Tag + nth-child
  */
 export function generateSelector(element: HTMLElement): string {
-    if (element.id) {
-        return `#${element.id}`;
-    }
     if (element.className) {
         const classes = element.className.trim().split(/\s+/).filter(isSemanticClass).slice(0, 3).join('.');
         if(classes)

@@ -87,13 +87,12 @@ export const resolveIdentifier = (
   // Fallback to cleaned class/id/tag
   const className = el.className?.trim() || ''
   const cleanedClassName = cleanClassNames(removePseudoClasses(className))
-  return (cleanedClassName || el.id || el.tagName || '').toString()
+  return (cleanedClassName || el.tagName || '').toString()
 }
 
 export const getIdentifierType = (el: PickedElement): 'className' | 'id' | 'tagName' => {
   const cleanedClassName = cleanClassNames(removePseudoClasses(el.className?.trim() || ''))
   if (cleanedClassName) return 'className'
-  if (el.id) return 'id'
   return 'tagName'
 }
 

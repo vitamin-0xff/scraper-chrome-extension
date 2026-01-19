@@ -1,4 +1,3 @@
-import { downloadJSON, generateFilename } from '@/utils/download-json'
 import { useEffect, useState } from 'react'
 
 type Props = {

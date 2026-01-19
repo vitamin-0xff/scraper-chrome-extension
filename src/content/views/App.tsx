@@ -1,48 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import './App.css'
-import TabNav, { StatusTab } from './TabNav';
+import TabNav from './TabNav';
 import { SelectRootElement } from './steps/SelectRootElement';
 import { SelectChildren } from './steps/SelectChildren';
 import { SelectPagination } from './steps/SelectPagination';
 import { PreviewExecution } from './steps/PreviewExecution';
 import Logo from '../../assets/crx.svg';
-import { ChildElement } from './types';
-import { type PaginationConfig } from './algorithms/extractionEngine';
+import { useUIStore } from './store';
 
 function App() {
   const [show, setShow] = useState(false)
-  const [currentActiveTab, setCurrentActiveTab] = useState<StatusTab>('root');
-  const [rootNativeElement, setRootNativeElement] = useState<HTMLElement | null>(null);
-  const [rootSelector, setRootSelector] = useState<string>('');
-  const [childElements, setChildElements] = useState<ChildElement[]>([]);
-  const [paginationConfig, setPaginationConfig] = useState<PaginationConfig | null>(null);
+  const activeTab = useUIStore((state) => state.activeTab);
+  const setActiveTab = useUIStore((state) => state.setActiveTab);
   
   const toggle = () => setShow(!show)
-
-  const handleAddChild = (child: ChildElement) => {
-    setChildElements(prev => [...prev, child]);
-  };
-
-  const handleRemoveChild = (id: string) => {
-    setChildElements(prev => prev.filter(child => child.id !== id));
-  };
-
-  const handleConfigChange = (config: PaginationConfig) => {
-    setPaginationConfig(config);
-  };
-
-  const onRootElementSelected = (rootElement: HTMLElement | null, selector?: string) => {
-    console.log("Root Element Changed");
-    setRootNativeElement(rootElement);
-    if (selector) {
-      setRootSelector(selector);
-    }
-  }
-
-  useEffect(() => {
-    console.log("Root Element Updated:", rootNativeElement);
-    console.log("Root Selector Updated:", rootSelector);
-  }, [rootNativeElement, rootSelector]);
 
   return (
     <div className="crx-ext-popup-container crx-ext-root-ext">
@@ -51,35 +22,18 @@ function App() {
           maxHeight: '60vh',
           overflowY: 'auto'
         }}>
-          <TabNav activeTab={currentActiveTab} onTabChange={setCurrentActiveTab} />
-          {currentActiveTab === 'root' && (
-            <SelectRootElement 
-              rootElement={rootNativeElement} 
-              rootSelector={rootSelector}
-              onRootElementSelected={onRootElementSelected}
-            />
+          <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
+          {activeTab === 'root' && (
+            <SelectRootElement />
           )}
-          {currentActiveTab === 'children' && (
-            <SelectChildren 
-              rootElement={rootNativeElement}
-              childrenElements={childElements}
-              onChildElementAdded={handleAddChild}
-              onChildElementRemoved={handleRemoveChild}
-            />
+          {activeTab === 'children' && (
+            <SelectChildren />
           )}
-          {currentActiveTab === 'pagination' && (
-            <SelectPagination 
-              onConfigChange={handleConfigChange}
-              initialConfig={paginationConfig || undefined}
-            />
+          {activeTab === 'pagination' && (
+            <SelectPagination />
           )}
-          {currentActiveTab === 'preview' && (
-            <PreviewExecution 
-              rootElement={rootNativeElement}
-              rootSelector={rootSelector}
-              childElements={childElements}
-              paginationConfig={paginationConfig}
-            />
+          {activeTab === 'preview' && (
+            <PreviewExecution />
           )}
     </div>
   )}

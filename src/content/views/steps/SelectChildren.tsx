@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useElementPicker } from "../useElementPicker";
 import { PickedElement, ChildElement, ElementType } from "../types";
 import SelectedElementInfo from "../SelectedElementInfo";
@@ -6,32 +6,39 @@ import {
     detectElementType,
     generateRelativePath,
 } from "../algorithms/childElementAlgorithms";
+import { useRootElementStore, useChildElementsStore } from "../store";
 
-type Props = {
-    rootElement: HTMLElement | null;
-    childrenElements: ChildElement[];
-    onChildElementAdded: (child: ChildElement) => void;
-    onChildElementRemoved: (id: string) => void;
-}
-
-export const SelectChildren = ({
-    rootElement,
-    childrenElements,
-    onChildElementAdded,
-    onChildElementRemoved
-}: Props) => {
+export const SelectChildren = () => {
+    const rootElementInfo = useRootElementStore((state) => state.rootElementInfo);
+    const childElements = useChildElementsStore((state) => state.childElements);
+    const addChildElement = useChildElementsStore((state) => state.addChildElement);
+    const removeChildElement = useChildElementsStore((state) => state.removeChildElement);
+    
     const [picking, setPicking] = useState(false);
     const [selectedChild, setSelectedChild] = useState<PickedElement | null>(null);
     const [childType, setChildType] = useState<ElementType>('text');
     const [childName, setChildName] = useState('');
     const [isList, setIsList] = useState(false);
     const [childPath, setChildPath] = useState('');
+    const [rootNativeElement, setRootNativeElement] = useState<HTMLElement | null>(null);
     const [extractOptions, setExtractOptions] = useState({
         extractText: true,
         extractHref: false,
         extractSrc: false,
         extractAlt: false,
     });
+
+    // Get root element from store info
+    useEffect(() => {
+        if (rootElementInfo) {
+            const { selector, index } = rootElementInfo;
+            const allMatching = document.querySelectorAll(selector);
+            const rootElement = allMatching[index] as HTMLElement | undefined;
+            setRootNativeElement(rootElement || null);
+        } else {
+            setRootNativeElement(null);
+        }
+    }, [rootElementInfo]);
 
     const { startPicker } = useElementPicker(
         (pickedElement) => {
@@ -47,7 +54,7 @@ export const SelectChildren = ({
             }
             
             setSelectedChild(pickedElement);
-            const path = generateRelativePath(rootElement, nativeElement);
+            const path = generateRelativePath(rootNativeElement, nativeElement);
             setChildPath(path);
             
             // Auto-detect type based on element
@@ -65,7 +72,7 @@ export const SelectChildren = ({
     );
 
     const handleStartPicking = () => {
-        if (picking || !rootElement) return;
+        if (picking || !rootNativeElement) return;
         setPicking(true);
         startPicker();
     };
@@ -89,7 +96,7 @@ export const SelectChildren = ({
             extractAlt: extractOptions.extractAlt,
         };
 
-        onChildElementAdded(newChild);
+        addChildElement(newChild);
         resetForm();
     };
 
@@ -145,7 +152,7 @@ export const SelectChildren = ({
                 </p>
             </div>
 
-            {!rootElement ? (
+            {!rootNativeElement ? (
                 <div className="crx-ext-warning-message">
                     <p>Please complete Step 1 first. Select a root element to continue.</p>
                 </div>
@@ -297,11 +304,11 @@ export const SelectChildren = ({
                     </div>
 
                     {/* Children List */}
-                    {childrenElements.length > 0 && (
+                    {childElements.length > 0 && (
                         <div className="crx-ext-children-list">
-                            <h3>Selected Child Elements ({childrenElements.length})</h3>
+                            <h3>Selected Child Elements ({childElements.length})</h3>
                             <div className="crx-ext-list-container">
-                                {childrenElements.map((child) => (
+                                {childElements.map((child) => (
                                     <div key={child.id} className="crx-ext-child-item">
                                         <div className="crx-ext-child-header">
                                             <div className="crx-ext-child-info">
@@ -311,7 +318,7 @@ export const SelectChildren = ({
                                             </div>
                                             <button
                                                 className="crx-ext-btn crx-ext-btn-delete"
-                                                onClick={() => onChildElementRemoved(child.id)}
+                                                onClick={() => removeChildElement(child.id)}
                                             >
                                                 Remove
                                             </button>
