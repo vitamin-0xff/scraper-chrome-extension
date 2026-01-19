@@ -99,6 +99,27 @@
   opacity: 0;
 }
 
+/* Tab transitions */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.crx-ext-tab-content {
+  position: relative;
+  overflow: hidden;
+}
+
+.crx-ext-tab-pane {
+  animation: fadeInSlide 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 .crx-ext-form-group {
   margin-bottom: 1rem;
   display: grid;
@@ -124,6 +145,8 @@
   border-radius: 0.375rem;
   font-size: 1.2rem;
   color: #111827;
+  transition: border-color 250ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .crx-ext-form-input:focus {
   outline: none;
@@ -222,6 +245,13 @@
   cursor: pointer;
   border: none;
   background-color: transparent;
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1), 
+              color 250ms cubic-bezier(0.4, 0, 0.2, 1),
+              transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.crx-ext-btn:active {
+  transform: scale(0.98);
 }
 
 .crx-ext-btn-b {
@@ -574,7 +604,7 @@
   border-radius: 0.375rem;
   font-size: 0.75rem;
   cursor: pointer;
-  transition: background-color 150ms;
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .crx-ext-btn-delete:hover {
@@ -608,11 +638,13 @@
   background-color: white;
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
-  transition: box-shadow 150ms;
+  transition: box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .crx-ext-child-item:hover {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-color: #bfdbfe;
 }
 
 .crx-ext-child-header {

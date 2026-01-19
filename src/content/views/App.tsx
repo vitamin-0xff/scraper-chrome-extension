@@ -23,18 +23,28 @@ function App() {
           overflowY: 'auto'
         }}>
           <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
-          {activeTab === 'root' && (
-            <SelectRootElement />
-          )}
-          {activeTab === 'children' && (
-            <SelectChildren />
-          )}
-          {activeTab === 'pagination' && (
-            <SelectPagination />
-          )}
-          {activeTab === 'preview' && (
-            <PreviewExecution />
-          )}
+          <div className="crx-ext-tab-content">
+            {activeTab === 'root' && (
+              <div className="crx-ext-tab-pane crx-ext-fade-in">
+                <SelectRootElement />
+              </div>
+            )}
+            {activeTab === 'children' && (
+              <div className="crx-ext-tab-pane crx-ext-fade-in">
+                <SelectChildren />
+              </div>
+            )}
+            {activeTab === 'pagination' && (
+              <div className="crx-ext-tab-pane crx-ext-fade-in">
+                <SelectPagination />
+              </div>
+            )}
+            {activeTab === 'preview' && (
+              <div className="crx-ext-tab-pane crx-ext-fade-in">
+                <PreviewExecution />
+              </div>
+            )}
+          </div>
     </div>
   )}
       <button className="crx-ext-toggle-button" onClick={toggle}>
