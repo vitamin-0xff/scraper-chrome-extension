@@ -196,12 +196,23 @@ export const SelectPagination = () => {
 
                     <div className="crx-ext-form-actions">
                         <button
-                            className="crx-ext-btn crx-ext-btn-primary"
+                            className={`crx-ext-btn  ${paginationConfig ? 'crx-ext-btn-secondary' : 'crx-ext-btn-primary'}`}
                             onClick={handleApplyConfig}
                             disabled={!isValid}
                         >
                             Apply Configuration
                         </button>
+                        {
+                            paginationConfig && (
+                                <button
+                                    className={"crx-ext-btn crx-ext-btn-primary " + paginationConfig ? 'crx-ext-btn-primary' : 'crx-ext-btn-disabled'}
+                                    onClick={() => setPaginationConfig(undefined)}
+                                    disabled={!isValid}
+                                >
+                                   Reset Configuration
+                                </button>
+                            )
+                        }
                     </div>
                 </div>
             </div>
